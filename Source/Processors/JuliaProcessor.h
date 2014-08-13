@@ -93,6 +93,9 @@ public:
     void setParameter(int parameterIndex, float newValue);
 
     void setFile(String fullpath);
+    void setBuffersize(int bufferSize); // set size of dataHistoryBuffer for keeping some data history around for the julia funciton to operate on
+
+
     String getFile();
 
     void reloadFile();
@@ -104,7 +107,11 @@ public:
 private:
 
     String filePath;
-    int hasJuliaInstance; // funcitons as enabled switch
+    bool hasJuliaInstance; // functions as enabled switch
+
+    int dataHistoryBufferSize; 
+    int dataHistoryBufferNumChannels; 
+    AudioSampleBuffer* dataHistoryBuffer; // sample wise data buffer for passing some more history to julia
 
     void run_julia_string(String juliaString);
 

@@ -52,6 +52,17 @@ JuliaProcessorEditor::JuliaProcessorEditor(GenericProcessor* parentNode, bool us
     addAndMakeVisible(fileNameLabel);
 
 
+    bufferSizeSelection = new Label("Buffer Size","30000"); // this is currently set in RHD2000Thread, the cleaner would be to set it here again
+    bufferSizeSelection->setEditable(true,false,false);
+    bufferSizeSelection->addListener(this);
+    bufferSizeSelection->setBounds(120,60,60,20);
+    bufferSizeSelection->setColour(Label::textColourId, Colours::darkgrey);
+    addAndMakeVisible(bufferSizeSelection);
+
+	bufferSizeSelectionLabel = new Label("","NBuf.:");
+	bufferSizeSelectionLabel->attachToComponent	(bufferSizeSelection,true);
+	addAndMakeVisible(bufferSizeSelectionLabel);
+
     Image im;
     im = ImageCache::getFromMemory(BinaryData::JuliaIconActive_png,
                                    BinaryData::JuliaIconActive_pngSize);
@@ -102,6 +113,7 @@ void JuliaProcessorEditor::buttonEvent(Button* button)
 
             if (chooseJuliaProcessorFile.browseForFileToOpen())
             {
+
                 // Use the selected file
                 setFile(chooseJuliaProcessorFile.getResult().getFullPathName());
 
@@ -114,9 +126,24 @@ void JuliaProcessorEditor::buttonEvent(Button* button)
         } 
         if (button == reloadFileButton)
         {
+
 			juliaProcessor->reloadFile();
+			
         }
 
+    }
+}
+
+void JuliaProcessorEditor::labelTextChanged(Label* label)
+{
+
+    if (!acquisitionIsActive)
+    {
+        if (label == bufferSizeSelection)
+        {
+            Value val = label->getTextValue();
+            juliaProcessor->setBuffersize(int(val.getValue()));
+        }
     }
 }
 

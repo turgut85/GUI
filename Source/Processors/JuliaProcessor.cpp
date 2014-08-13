@@ -35,6 +35,11 @@ JuliaProcessor::JuliaProcessor()
 {
 
     hasJuliaInstance=false;
+    dataHistoryBufferNumChannels=256;
+
+    dataHistoryBuffer = new AudioSampleBuffer(dataHistoryBufferNumChannels, 60000);
+    dataHistoryBuffer->clear();
+
 
    // jl_init("/home/jvoigts/julia/usr/bin");
    // JL_SET_STACK_BASE;
@@ -54,6 +59,7 @@ JuliaProcessor::JuliaProcessor()
 JuliaProcessor::~JuliaProcessor()
 {
     //jl_exit(0); // is this needed?
+    deleteAndZero(dataHistoryBuffer);
 }
 
 AudioProcessorEditor* JuliaProcessor::createEditor()
@@ -95,6 +101,18 @@ void JuliaProcessor::setFile(String fullpath)
     //juliaString+="\")";
     
    // run_julia_string(juliaString);
+}
+
+void JuliaProcessor::setBuffersize(int bufferSize)
+{
+    if (bufferSize>1)
+    {
+        dataHistoryBufferSize=bufferSize;
+        printf("Setting history buffer size to %d samples \n", dataHistoryBufferSize);
+        dataHistoryBuffer->setSize(dataHistoryBufferNumChannels, dataHistoryBufferSize, false, true, false);
+    } else {
+        printf("History buffer size has to be at least 1");
+    }
 }
 
 void JuliaProcessor::reloadFile()

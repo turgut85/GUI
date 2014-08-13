@@ -41,14 +41,15 @@ class JuliaProcessor;
 
 */
 
-class JuliaProcessorEditor : public GenericEditor
-
+class JuliaProcessorEditor : public GenericEditor,
+public Label::Listener
 {
 public:
     JuliaProcessorEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
     virtual ~JuliaProcessorEditor();
 
     void buttonEvent(Button* button);
+	void labelTextChanged(Label* te);
 
     void setFile(String file);
 
@@ -63,6 +64,9 @@ private:
     ScopedPointer<UtilityButton> fileButton;
     ScopedPointer<UtilityButton> reloadFileButton;
     ScopedPointer<Label> fileNameLabel;
+	
+	ScopedPointer<Label> bufferSizeSelection;
+	ScopedPointer<Label> bufferSizeSelectionLabel;
 
     JuliaProcessor* juliaProcessor;
 
