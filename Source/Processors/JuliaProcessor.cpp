@@ -167,7 +167,7 @@ void JuliaProcessor::process(AudioSampleBuffer& buffer,
 
     if (hasJuliaInstance){
 
-    	jl_function_t *func = jl_get_function(jl_main_module, "oe_process");    
+    	jl_function_t *func = jl_get_function(jl_main_module, "oe_process!");    
         //jl_function_t *func  = jl_get_function(jl_base_module, "reverse!");
 
         // pass buffer to function
