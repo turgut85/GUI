@@ -167,8 +167,31 @@ void JuliaProcessor::process(AudioSampleBuffer& buffer,
 
     if (hasJuliaInstance){
 
-    	jl_function_t *func = jl_get_function(jl_main_module, "myprocess");    
+    	jl_function_t *func = jl_get_function(jl_main_module, "oe_process");    
+        //jl_function_t *func  = jl_get_function(jl_base_module, "reverse!");
 
+        // pass buffer to function
+        // Create 2D array of float64 type
+
+    
+        jl_value_t *array_type = jl_apply_array_type(jl_float32_type, 1); // last arg is nDims
+        //jl_array_t *x  = jl_alloc_array_2d(array_type, buffer->getNumChannels(), buffer->getNumSamples());
+        
+        for (int n = 0; n < getNumOutputs(); n++)
+         {
+            float* ptr = buffer.getWritePointer(n); // to perform in-place edits to the buffer
+            //float* ptr = buffer.getReadPointer(n);
+            jl_array_t *x = jl_ptr_to_array_1d(array_type, ptr , buffer.getNumSamples(), 0);
+
+            JL_GC_PUSH1(&x);
+
+            //jl_array_t *y = (jl_array_t*) jl_call1(func, (jl_value_t*)x);
+            //buffer= jl_array_data(y);
+            jl_call1(func, (jl_value_t*)x);
+
+            JL_GC_POP();
+        }
+        /*
         // just test by running on one sample at a time
     	for (int i = 2; i < buffer.getNumChannels(); i++)
         {
@@ -193,6 +216,8 @@ void JuliaProcessor::process(AudioSampleBuffer& buffer,
         		buffer.setSample(i,j,j_out); //ch, sample,val
         	}
         }
+        */
+
     }
 }
 

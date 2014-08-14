@@ -1,8 +1,11 @@
-function myprocess(data)
-	return sqrt(abs(data))*10
-	if data>-1000
-		return 200*abs(cos(data/10))
-	else
-		return 200*abs(cos(data/10))
-	end
+
+# set things up here
+tscale=100
+
+# this function is called once per buffer upddate and is passed
+# the current buffer in data
+function oe_process(data)
+
+	#data[:]=reverse(data);
+	 data[:]=sin(data/tscale)*200
 end
