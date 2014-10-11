@@ -1,0 +1,96 @@
+/*
+    ------------------------------------------------------------------
+
+    This file is part of the Open Ephys GUI
+    Copyright (C) 2013 Open Ephys
+
+    ------------------------------------------------------------------
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+#ifndef __NETWORKEVENT_H_91811541__
+#define __NETWORKEVENT_H_91811541__
+
+#include "../../Network/zmq.h"
+#include "../../Network/zmq_utils.h"
+
+#include "../../../JuceLibraryCode/JuceHeader.h"
+#include "../GenericProcessor/GenericProcessor.h"
+
+#include <list>
+#include <queue>
+
+/**
+
+ Sends incoming TCP/IP messages from 0MQ to the events buffer
+
+  @see GenericProcessor
+
+*/
+
+
+class NetworkEvents : public GenericProcessor,  public Thread
+{
+public:
+    NetworkEvents();
+    ~NetworkEvents();
+	AudioProcessorEditor* createEditor();
+    void process(AudioSampleBuffer& buffer, MidiBuffer& midiMessages, int& nSamples);
+    void setParameter(int parameterIndex, float newValue);
+	String handleSpecialMessages(String msg);
+
+	bool isSource();
+
+	bool disable();
+	void run();
+	void opensocket();
+
+	bool isReady();
+	float getDefaultSampleRate();
+	int getDefaultNumOutputs();
+	float getDefaultBitVolts();
+	void enabledState(bool t);
+
+	void sendMessage(String s, MidiBuffer& events);
+	void setNewListeningPort(int port);
+
+	void saveCustomParametersToXml(XmlElement* parentElement);
+	void loadCustomParametersFromXml();
+
+	int urlport;
+	 String socketStatus;
+	 bool threadRunning ;
+private:
+	void handleEvent(int eventType, MidiMessage& event, int samplePos);
+
+	void *zmqcontext;
+	void *responder;
+    float threshold;
+    float bufferZone;
+    bool state;
+    bool shutdown;
+	Time timer;
+ 	std::queue<String> networkMessagesQueue;
+	
+	CriticalSection lock;
+	int64 simulationStartTime;
+	bool firstTime ;
+
+   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkEvents);
+
+};
+
+#endif  // __NETWORKEVENT_H_91811541__
