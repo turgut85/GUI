@@ -2,7 +2,7 @@
 ------------------------------------------------------------------
 
     This file is part of the Open Ephys GUI
-    Copyright (C) 2014 Open Ephys
+    Copyright (C) 2013 Open Ephys
 
     ------------------------------------------------------------------
 
@@ -50,6 +50,7 @@
 #include "../SerialInput/SerialInput.h"
 #include "../MessageCenter/MessageCenter.h"
 #include "../RecordControl/RecordControl.h"
+#include "../NetworkEvents/NetworkEvents.h"
 #include "../Splitter/Splitter.h"
 #include "../Merger/Merger.h"
 #include "../../UI/UIComponent.h"
@@ -546,6 +547,12 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
             processor = new SerialInput();
             std::cout << "Creating a new serial port input." << std::endl;
         }
+        else if (subProcessorType.equalsIgnoreCase("Network Events"))
+        {
+            processor = new NetworkEvents();
+            std::cout << "Creating a new network events node." << std::endl;
+        }
+
 
 
 

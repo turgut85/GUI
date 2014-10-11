@@ -70,8 +70,7 @@ void MessageCenter::process(AudioSampleBuffer& buffer, MidiBuffer& eventBuffer, 
 
     if (newEventAvailable)
     {
-        int numBytes = 0;
-        
+
         String eventString = messageCenterEditor->getLabelString();
 
         CharPointer_UTF8 data = eventString.toUTF8();

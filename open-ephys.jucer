@@ -37,7 +37,7 @@
         <MODULEPATH id="juce_audio_basics" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" extraLinkerFlags="-pg -ldl -lXext -lGLU -lhdf5 -lhdf5_cpp"
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" extraLinkerFlags="-pg -ldl -lXext -lGLU -lhdf5 -lhdf5_cpp -lzmq"
                 extraCompilerFlags="-export-dynamic -g -pg -std=c++0x">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="3" targetName="open-ephys"
@@ -268,6 +268,15 @@
               file="Source/Audio/AudioComponent.h"/>
       </GROUP>
       <GROUP id="yQmqZWk" name="Processors">
+        <GROUP id="{6E059BEC-4A8F-BCDA-1F91-9B22C6CBF2E4}" name="NetworkEvents">
+          <FILE id="CrEt8U" name="NetworkEventsEditor.cpp" compile="1" resource="0"
+                file="Source/Processors/NetworkEvents/NetworkEventsEditor.cpp"/>
+          <FILE id="sMnO8j" name="NetworkEventsEditor.h" compile="0" resource="0"
+                file="Source/Processors/NetworkEvents/NetworkEventsEditor.h"/>
+          <FILE id="jlB9wb" name="NetworkEvents.cpp" compile="1" resource="0"
+                file="Source/Processors/NetworkEvents/NetworkEvents.cpp"/>
+          <FILE id="ShzGJB" name="NetworkEvents.h" compile="0" resource="0" file="Source/Processors/NetworkEvents/NetworkEvents.h"/>
+        </GROUP>
         <GROUP id="{447899E6-3974-53D0-5588-79643E8F5CA3}" name="ArduinoOutput">
           <FILE id="Ucs5gf" name="ArduinoOutput.cpp" compile="1" resource="0"
                 file="Source/Processors/ArduinoOutput/ArduinoOutput.cpp"/>

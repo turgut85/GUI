@@ -266,6 +266,8 @@
     <ClCompile Include="..\..\Source\AccessClass.cpp"/>
     <ClCompile Include="..\..\Source\Network\PracticalSocket.cpp"/>
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp"/>
+    <ClCompile Include="..\..\Source\Processors\NetworkEvents\NetworkEventsEditor.cpp"/>
+    <ClCompile Include="..\..\Source\Processors\NetworkEvents\NetworkEvents.cpp"/>
     <ClCompile Include="..\..\Source\Processors\ArduinoOutput\ArduinoOutput.cpp"/>
     <ClCompile Include="..\..\Source\Processors\ArduinoOutput\ArduinoOutputEditor.cpp"/>
     <ClCompile Include="..\..\Source\Processors\AudioNode\AudioEditor.cpp"/>
@@ -1512,6 +1514,8 @@
     <ClInclude Include="..\..\Source\AccessClass.h"/>
     <ClInclude Include="..\..\Source\Network\PracticalSocket.h"/>
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h"/>
+    <ClInclude Include="..\..\Source\Processors\NetworkEvents\NetworkEventsEditor.h"/>
+    <ClInclude Include="..\..\Source\Processors\NetworkEvents\NetworkEvents.h"/>
     <ClInclude Include="..\..\Source\Processors\ArduinoOutput\ArduinoOutput.h"/>
     <ClInclude Include="..\..\Source\Processors\ArduinoOutput\ArduinoOutputEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\AudioNode\AudioEditor.h"/>

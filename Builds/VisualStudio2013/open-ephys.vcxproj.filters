@@ -32,6 +32,9 @@
     <Filter Include="open-ephys\Source\Processors">
       <UniqueIdentifier>{3DDEC88C-BAA5-2DDA-A59F-0FB74070AB82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="open-ephys\Source\Processors\NetworkEvents">
+      <UniqueIdentifier>{C41A0CBC-4C1C-5AC2-CAED-3EC41B4BAB37}</UniqueIdentifier>
+    </Filter>
     <Filter Include="open-ephys\Source\Processors\ArduinoOutput">
       <UniqueIdentifier>{26D17857-B604-0035-CFB5-C3FFD320BD99}</UniqueIdentifier>
     </Filter>
@@ -453,6 +456,12 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Audio\AudioComponent.cpp">
       <Filter>open-ephys\Source\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\NetworkEvents\NetworkEventsEditor.cpp">
+      <Filter>open-ephys\Source\Processors\NetworkEvents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Processors\NetworkEvents\NetworkEvents.cpp">
+      <Filter>open-ephys\Source\Processors\NetworkEvents</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Processors\ArduinoOutput\ArduinoOutput.cpp">
       <Filter>open-ephys\Source\Processors\ArduinoOutput</Filter>
@@ -2048,6 +2057,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Audio\AudioComponent.h">
       <Filter>open-ephys\Source\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\NetworkEvents\NetworkEventsEditor.h">
+      <Filter>open-ephys\Source\Processors\NetworkEvents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\NetworkEvents\NetworkEvents.h">
+      <Filter>open-ephys\Source\Processors\NetworkEvents</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\ArduinoOutput\ArduinoOutput.h">
       <Filter>open-ephys\Source\Processors\ArduinoOutput</Filter>
