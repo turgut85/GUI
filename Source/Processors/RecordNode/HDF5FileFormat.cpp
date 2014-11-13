@@ -124,24 +124,25 @@ int HDF5FileBase::setAttribute(DataTypes type, void* data, String path, String n
 
 int HDF5FileBase::setAttributeArray(DataTypes type, void* data, int size, String path, String name)
 {
-	H5Location* loc;
 	Group gloc;
 	DataSet dloc;
     Attribute attr;
     DataType H5type;
     DataType origType;
 
+    hid_t dataId;
+
     if (!opened) return -1;
     try
     {
         try {
 			gloc = file->openGroup(path.toUTF8());
-			loc = &gloc;
+      dataId = gloc.getId();
 		}
 		catch (FileIException error) //If there is no group with that path, try a dataset
 		{
 			dloc = file->openDataSet(path.toUTF8());
-			loc = &dloc;
+      dataId = dloc.getId();
 		}
 
         H5type = getH5Type(type);
@@ -154,14 +155,32 @@ int HDF5FileBase::setAttributeArray(DataTypes type, void* data, int size, String
 			origType = ArrayType(origType,1,&dims);
 		}
 
-        if (loc->attrExists(name.toUTF8()))
+        if (H5Aexists(dataId,name.toUTF8()) > 0)
         {
-            attr = loc->openAttribute(name.toUTF8());
+            //attr = loc->openAttribute(name.toUTF8());
+            hid_t attr_id = H5Aopen(dataId, name.toUTF8(), H5P_DEFAULT);
+            if (attr_id > 0) {
+              Attribute temp_attr(attr_id);
+              attr = temp_attr;
+            }
+            else {
+              //throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen failed");
+              return -1;
+            }
         }
         else
         {
             DataSpace attr_dataspace(H5S_SCALAR);
-            attr = loc->createAttribute(name.toUTF8(),H5type,attr_dataspace);
+            hid_t attr_id = H5Acreate2(dataId, name.toUTF8(), H5type.getId(),
+                attr_dataspace.getId(), PropList::DEFAULT.getId(), H5P_DEFAULT);
+            if (attr_id > 0) {
+              Attribute temp_attr(attr_id);
+              attr = temp_attr;
+            }
+            else {
+              //throw AttributeIException(inMemFunc("createAttribute"), "H5Acreate2 failed");
+              return -1;
+            }
         }
 
         attr.write(origType,data);
@@ -189,10 +208,10 @@ int HDF5FileBase::setAttributeArray(DataTypes type, void* data, int size, String
 
 int HDF5FileBase::setAttributeStr(String value, String path, String name)
 {
-	H5Location* loc;
 	Group gloc;
 	DataSet dloc;
     Attribute attr;
+    hid_t dataId;
 
     if (!opened) return -1;
 
@@ -201,24 +220,34 @@ int HDF5FileBase::setAttributeStr(String value, String path, String name)
     {
 		try {
 			gloc = file->openGroup(path.toUTF8());
-			loc = &gloc;
+      dataId = gloc.getId();
 		}
 		catch (FileIException error) //If there is no group with that path, try a dataset
 		{
 			dloc = file->openDataSet(path.toUTF8());
-			loc = &dloc;
+      dataId = dloc.getId();
 		}
 
-        if (loc->attrExists(name.toUTF8()))
+        if (H5Aexists(dataId,name.toUTF8()) > 0)
         {
-            //attr = loc.openAttribute(name.toUTF8());
+            //attr = loc->openAttribute(name.toUTF8());
             return -1; //string attributes cannot change size easily, better not allow overwritting.
         }
         else
         {
             DataSpace attr_dataspace(H5S_SCALAR);
-            attr = loc->createAttribute(name.toUTF8(), type, attr_dataspace);
+            hid_t attr_id = H5Acreate2(dataId, name.toUTF8(), type.getId(),
+                attr_dataspace.getId(), PropList::DEFAULT.getId(), H5P_DEFAULT);
+            if (attr_id > 0) {
+              Attribute temp_attr(attr_id);
+              attr = temp_attr;
+            }
+            else {
+              //throw AttributeIException(inMemFunc("createAttribute"), "H5Acreate2 failed");
+              return -1;
+            }
         }
+
         attr.write(type,value.toUTF8());
 
     }
