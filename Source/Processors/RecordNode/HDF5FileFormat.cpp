@@ -144,9 +144,20 @@ int HDF5FileBase::setAttributeArray(DataTypes type, void* data, int size, String
 			origType = ArrayType(origType,1,&dims);
 		}
 
-        if (loc.attrExists(name.toUTF8()))
+
+        herr_t ret_value;
+        //if (loc.attrExists(name.toUTF8()))
+        if ((ret_value = H5Aexists(loc.getId(), name.toUTF8())) > 0)
         {
-            attr = loc.openAttribute(name.toUTF8());
+            //attr = loc.openAttribute(name.toUTF8());
+            hid_t attr_id = H5Aopen(loc.getId(), name.toUTF8(), H5P_DEFAULT);
+            if (attr_id > 0) {
+              Attribute temp_attr( attr_id );
+              attr = temp_attr;
+            }
+            else {
+              throw AttributeIException("openAttribute", "H5Aopen failed");
+            }
         }
         else
         {
@@ -181,7 +192,9 @@ int HDF5FileBase::setAttributeStr(String value, String path, String name)
     {
         loc = file->openGroup(path.toUTF8());
 
-        if (loc.attrExists(name.toUTF8()))
+        herr_t ret_value;
+        //if (loc.attrExists(name.toUTF8()))
+        if ((ret_value = H5Aexists(loc.getId(), name.toUTF8())) > 0)
         {
             //attr = loc.openAttribute(name.toUTF8());
             return -1; //string attributes cannot change size easily, better not allow overwritting.
