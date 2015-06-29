@@ -516,7 +516,8 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
             // subProcessorType.equalsIgnoreCase("File Reader") ||
             subProcessorType.equalsIgnoreCase("Custom FPGA") ||
             subProcessorType.equalsIgnoreCase("eCube") || // Added by Michael Borisov
-            subProcessorType.equalsIgnoreCase("Rhythm FPGA"))
+            subProcessorType.equalsIgnoreCase("Rhythm FPGA") ||
+            subProcessorType.equalsIgnoreCase("Neuropix"))
         {
 
             // if (subProcessorType.equalsIgnoreCase("Intan Demo Board") &&

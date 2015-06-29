@@ -24,9 +24,11 @@
 #include "SourceNode.h"
 #include "../DataThreads/DataBuffer.h"
 #include "../DataThreads/RHD2000Thread.h"
+#include "../DataThreads/NeuropixThread.h"
 #include "../DataThreads/EcubeThread.h" // Added by Michael Borisov
 #include "../SourceNode/SourceNodeEditor.h"
 #include "../DataThreads/RHD2000Editor.h"
+#include "../DataThreads/NeuropixEditor.h"
 #include "../DataThreads/EcubeEditor.h" // Added by Michael Borisov
 #include "../Channel/Channel.h"
 #include <stdio.h>
@@ -51,6 +53,9 @@ SourceNode::SourceNode(const String& name_)
     else if (getName().equalsIgnoreCase("Rhythm FPGA"))
     {
         dataThread = new RHD2000Thread(this);
+    } else if (getName().equalsIgnoreCase("Neuropix"))
+    {
+        dataThread = new NeuropixThread(this);
     }
 #if ECUBE_COMPILE
     else if (getName().equalsIgnoreCase("eCube"))
@@ -241,6 +246,13 @@ AudioProcessorEditor* SourceNode::createEditor()
     if (getName().equalsIgnoreCase("Rhythm FPGA"))
     {
         editor = new RHD2000Editor(this, (RHD2000Thread*) dataThread.get(), true);
+
+        //  RHD2000Editor* r2e = (RHD2000Editor*) editor.get();
+        //  r2e->scanPorts();
+    }
+    else if (getName().equalsIgnoreCase("Neuropix"))
+    {
+        editor = new NeuropixEditor(this, (NeuropixThread*) dataThread.get(), true);
 
         //  RHD2000Editor* r2e = (RHD2000Editor*) editor.get();
         //  r2e->scanPorts();

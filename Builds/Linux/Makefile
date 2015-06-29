@@ -64,6 +64,8 @@ OBJECTS := \
   $(OBJDIR)/Channel_5cb2d4d2.o \
   $(OBJDIR)/ChannelMappingEditor_9b145f15.o \
   $(OBJDIR)/ChannelMappingNode_ec0559ea.o \
+  $(OBJDIR)/NeuropixEditor_b3d0630.o \
+  $(OBJDIR)/NeuropixThread_21605c4d.o \
   $(OBJDIR)/EcubeEditor_ba242592.o \
   $(OBJDIR)/RHD2000Editor_dbd5a24.o \
   $(OBJDIR)/EcubeThread_d0477baf.o \
@@ -270,6 +272,16 @@ $(OBJDIR)/ChannelMappingEditor_9b145f15.o: ../../Source/Processors/ChannelMappin
 $(OBJDIR)/ChannelMappingNode_ec0559ea.o: ../../Source/Processors/ChannelMappingNode/ChannelMappingNode.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling ChannelMappingNode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/NeuropixEditor_b3d0630.o: ../../Source/Processors/DataThreads/NeuropixEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling NeuropixEditor.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/NeuropixThread_21605c4d.o: ../../Source/Processors/DataThreads/NeuropixThread.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling NeuropixThread.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/EcubeEditor_ba242592.o: ../../Source/Processors/DataThreads/EcubeEditor.cpp

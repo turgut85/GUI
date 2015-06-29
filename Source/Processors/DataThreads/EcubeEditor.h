@@ -43,6 +43,7 @@ User interface for the "eCube" source node.
 
 class EcubeEditor : public GenericEditor,
     public Slider::Listener, public ComboBox::Listener
+
 {
 public:
     EcubeEditor(GenericProcessor* parentNode, EcubeThread* npThread, bool useDefaultParameterEditors);

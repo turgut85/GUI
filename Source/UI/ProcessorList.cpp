@@ -56,6 +56,7 @@ ProcessorList::ProcessorList()
     //sources->addSubItem(new ProcessorListItem("Signal Generator"));
     //sources->addSubItem(new ProcessorListItem("Custom FPGA"));
     sources->addSubItem(new ProcessorListItem("Rhythm FPGA"));
+    sources->addSubItem(new ProcessorListItem("Neuropix"));
 #if JUCE_WINDOWS // eCube module currently only available for Windows
 #ifdef ECUBE_COMPILE
     sources->addSubItem(new ProcessorListItem("eCube")); // Added by Michael Borisov

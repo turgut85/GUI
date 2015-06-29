@@ -331,6 +331,14 @@
                 file="Source/Processors/ChannelMappingNode/ChannelMappingNode.h"/>
         </GROUP>
         <GROUP id="ZgsuWxi" name="DataThreads">
+          <FILE id="sHJmld" name="NeuropixEditor.cpp" compile="1" resource="0"
+                file="Source/Processors/DataThreads/NeuropixEditor.cpp"/>
+          <FILE id="j0zx4S" name="NeuropixEditor.h" compile="0" resource="0"
+                file="Source/Processors/DataThreads/NeuropixEditor.h"/>
+          <FILE id="cSBETy" name="NeuropixThread.cpp" compile="1" resource="0"
+                file="Source/Processors/DataThreads/NeuropixThread.cpp"/>
+          <FILE id="ZSfcl2" name="NeuropixThread.h" compile="0" resource="0"
+                file="Source/Processors/DataThreads/NeuropixThread.h"/>
           <FILE id="gHzlwP" name="EcubeEditor.cpp" compile="1" resource="0" file="Source/Processors/DataThreads/EcubeEditor.cpp"/>
           <FILE id="Bi0une" name="EcubeEditor.h" compile="0" resource="0" file="Source/Processors/DataThreads/EcubeEditor.h"/>
           <FILE id="ZBPSXE" name="RHD2000Editor.cpp" compile="1" resource="0"
