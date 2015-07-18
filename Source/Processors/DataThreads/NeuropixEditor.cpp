@@ -24,9 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "NeuropixThread.h"
 #include "NeuropixEditor.h"
 
-
-
-NeuropixEditor::NeuropixEditor(GenericProcessor* parentNode, NeuropixThread* thread, bool useDefaultParameterEditors)
+NeuropixEditor::NeuropixEditor(GenericProcessor* parentNode, NeuropixThread* t, bool useDefaultParameterEditors)
  : VisualizerEditor(parentNode, useDefaultParameterEditors)
 {
 	desiredWidth = 200;
@@ -42,6 +40,8 @@ NeuropixEditor::NeuropixEditor(GenericProcessor* parentNode, NeuropixThread* thr
 	}
 	optionComboBox->setSelectedId(1);
 	addAndMakeVisible(optionComboBox);
+
+	thread = t;
 }
 
 NeuropixEditor::~NeuropixEditor()
@@ -72,19 +72,19 @@ void NeuropixEditor::loadEditorParameters(XmlElement* xml)
 Visualizer* NeuropixEditor::createNewCanvas(void)
 {
 	GenericProcessor* processor = (GenericProcessor*) getProcessor();
-    canvas = new NeuropixCanvas(processor);
+    canvas = new NeuropixCanvas(processor, thread);
     return canvas;
 }
 
 /********************************************/
 
-NeuropixCanvas::NeuropixCanvas(GenericProcessor* p)
+NeuropixCanvas::NeuropixCanvas(GenericProcessor* p, NeuropixThread* thread)
 {
 
 	processor = (SourceNode*) p;
 
 	neuropixViewport = new Viewport();
-	neuropixInterface = new NeuropixInterface();
+	neuropixInterface = new NeuropixInterface(thread);
 	neuropixViewport->setViewedComponent(neuropixInterface, false);
 	addAndMakeVisible(neuropixViewport);
 
@@ -153,7 +153,7 @@ void NeuropixCanvas::buttonClicked(Button* button)
 
 
 /*****************************************************/
-NeuropixInterface::NeuropixInterface()
+NeuropixInterface::NeuropixInterface(NeuropixThread* t): thread(t)
 {
 	cursorType = MouseCursor::NormalCursor;
 
@@ -170,6 +170,7 @@ NeuropixInterface::NeuropixInterface()
 		channelLfpGain.add(0);
 		channelApGain.add(0);
 		channelSelectionState.add(0);
+		channelOutput.add(1);
 	}
 
 
@@ -195,6 +196,7 @@ NeuropixInterface::NeuropixInterface()
 
 	option1and2refs.add(304);
 	option1and2refs.add(341);
+	option1and2refs.add(380);
 
 	option3refs = option1and2refs;
 
@@ -212,8 +214,6 @@ NeuropixInterface::NeuropixInterface()
 	option3refs.add(881);
 	option3refs.add(920);
 	option3refs.add(957);
-
-	option1and2refs.add(380);
 
 	option4refs.add(313);
 	option4refs.add(352);
@@ -254,23 +254,15 @@ NeuropixInterface::NeuropixInterface()
 	referenceComboBox = new ComboBox("ReferenceComboBox");
 	referenceComboBox->setBounds(400, 250, 65, 22);
 	referenceComboBox->addListener(this);
-
-	for (int i = 0; i < 11; i++)
-	{
-		referenceComboBox->addItem(String(i), i+1);
-	}
-
+	referenceComboBox->addItem("Ext", 1);
 	referenceComboBox->setSelectedId(1);
 
 	filterComboBox = new ComboBox("FilterComboBox");
-	filterComboBox->setBounds(400, 300, 65, 22);
+	filterComboBox->setBounds(400, 300, 75, 22);
 	filterComboBox->addListener(this);
-
-	for (int i = 0; i < 3; i++)
-	{
-		filterComboBox->addItem(String(i), i+1);
-	}
-
+	filterComboBox->addItem("300 Hz", 1);
+	filterComboBox->addItem("500 Hz", 2);
+	filterComboBox->addItem("1 kHz", 3);
 	filterComboBox->setSelectedId(1);
 
 	enableButton = new UtilityButton("ENABLE", Font("Small Text", 13, Font::plain));
@@ -284,6 +276,18 @@ NeuropixInterface::NeuropixInterface()
     selectAllButton->setBounds(400,50,95,22);
     selectAllButton->addListener(this);
     selectAllButton->setTooltip("Select all channels");
+
+    outputOnButton = new UtilityButton("ON", Font("Small Text", 13, Font::plain));
+    outputOnButton->setRadius(3.0f);
+    outputOnButton->setBounds(400,350,40,22);
+    outputOnButton->addListener(this);
+    outputOnButton->setTooltip("Turn output on for selected channels");
+
+    outputOffButton = new UtilityButton("OFF", Font("Small Text", 13, Font::plain));
+    outputOffButton->setRadius(3.0f);
+    outputOffButton->setBounds(450,350,40,22);
+    outputOffButton->addListener(this);
+    outputOffButton->setTooltip("Turn output off for selected channels");
 
     enableViewButton = new UtilityButton("VIEW", Font("Small Text", 12, Font::plain));
     enableViewButton->setRadius(3.0f);
@@ -309,6 +313,12 @@ NeuropixInterface::NeuropixInterface()
     referenceViewButton->addListener(this);
     referenceViewButton->setTooltip("View reference of each channel");
 
+    annotationButton = new UtilityButton("ADD", Font("Small Text", 12, Font::plain));
+    annotationButton->setRadius(3.0f);
+    annotationButton->setBounds(400,480,40,18);
+    annotationButton->addListener(this);
+    annotationButton->setTooltip("Add annotation to selected channels");
+
     addAndMakeVisible(lfpGainComboBox);
     addAndMakeVisible(apGainComboBox);
     addAndMakeVisible(referenceComboBox);
@@ -316,10 +326,13 @@ NeuropixInterface::NeuropixInterface()
 
     addAndMakeVisible(enableButton);
     addAndMakeVisible(selectAllButton);
+    addAndMakeVisible(outputOnButton);
+    addAndMakeVisible(outputOffButton);
     addAndMakeVisible(enableViewButton);
     addAndMakeVisible(lfpGainViewButton);
     addAndMakeVisible(apGainViewButton);
     addAndMakeVisible(referenceViewButton);
+    addAndMakeVisible(annotationButton);
 
     lfpGainLabel = new Label("LFP GAIN","LFP GAIN");
     lfpGainLabel->setFont(Font("Small Text", 13, Font::plain));
@@ -345,6 +358,31 @@ NeuropixInterface::NeuropixInterface()
     filterLabel->setColour(Label::textColourId, Colours::grey);
     addAndMakeVisible(filterLabel);
 
+    outputLabel = new Label("OUTPUT", "OUTPUT");
+    outputLabel->setFont(Font("Small Text", 13, Font::plain));
+    outputLabel->setBounds(396,330,200,20);
+    outputLabel->setColour(Label::textColourId, Colours::grey);
+    addAndMakeVisible(outputLabel);
+
+    annotationLabel = new Label("ANNOTATION", "Custom annotation");
+    annotationLabel->setBounds(396,420,200,20);
+    annotationLabel->setColour(Label::textColourId, Colours::white);
+    annotationLabel->setEditable(true);
+    annotationLabel->addListener(this);
+    addAndMakeVisible(annotationLabel);
+
+    annotationLabelLabel = new Label("ANNOTATION_LABEL", "ANNOTATION");
+    annotationLabelLabel->setFont(Font("Small Text", 13, Font::plain));
+    annotationLabelLabel->setBounds(396,400,200,20);
+    annotationLabelLabel->setColour(Label::textColourId, Colours::grey);
+    addAndMakeVisible(annotationLabelLabel);
+
+    outputLabel = new Label("OUTPUT", "OUTPUT");
+    outputLabel->setFont(Font("Small Text", 13, Font::plain));
+    outputLabel->setBounds(396,330,200,20);
+    outputLabel->setColour(Label::textColourId, Colours::grey);
+    addAndMakeVisible(outputLabel);
+
     shankPath.startNewSubPath(27, 28);
     shankPath.lineTo(27, 514);
     shankPath.lineTo(27+5, 522);
@@ -354,11 +392,23 @@ NeuropixInterface::NeuropixInterface()
 
    	setOption(1);
 
+   	colorSelector = new ColorSelector(this);
+   	colorSelector->setBounds(400, 450, 250, 20);
+   	addAndMakeVisible(colorSelector);
+
 }
 
 NeuropixInterface::~NeuropixInterface()
 {
 
+}
+
+void NeuropixInterface::labelTextChanged(Label* label)
+{
+	if (label == annotationLabel)
+	{
+		colorSelector->updateCurrentString(label->getText());
+	}
 }
 
 void NeuropixInterface::comboBoxChanged(ComboBox* comboBox)
@@ -369,10 +419,16 @@ void NeuropixInterface::comboBoxChanged(ComboBox* comboBox)
 
 		for (int i = 0; i < 966; i++)
 		{
-			if (channelSelectionState[i] == 1)
+			if (channelSelectionState[i] == 1) {
 				channelApGain.set(i, gainSetting);
 
-			// inform the thread of the new settings
+				// inform the thread of the new settings
+				if (channelStatus[i] == 1)
+					thread->setGain(getChannelForElectrode(i), gainSetting, channelLfpGain[i]);
+			}	
+
+			
+
 		}
 	} else if (comboBox == lfpGainComboBox)
 	{
@@ -384,6 +440,9 @@ void NeuropixInterface::comboBoxChanged(ComboBox* comboBox)
 				channelLfpGain.set(i, gainSetting);
 
 			// inform the thread of the new settings
+			if (channelStatus[i] == 1)
+				thread->setGain(getChannelForElectrode(i), channelApGain[i], gainSetting);
+
 		}
 	} else if (comboBox == referenceComboBox)
 	{
@@ -392,9 +451,11 @@ void NeuropixInterface::comboBoxChanged(ComboBox* comboBox)
 		for (int i = 0; i < 966; i++)
 		{
 			if (channelSelectionState[i] == 1)
-				channelReference.set(i,refSetting);
+				channelReference.set(i, refSetting);
 
 			// inform the thread of the new settings
+			if (channelStatus[i] == 1)
+				thread->setReference(getChannelForElectrode(i), refSetting);
 		}
 	} else if (comboBox == filterComboBox)
 	{
@@ -402,6 +463,12 @@ void NeuropixInterface::comboBoxChanged(ComboBox* comboBox)
 	}
 
 	repaint();
+}
+
+void NeuropixInterface::setAnnotationLabel(String s, Colour c)
+{
+	annotationLabel->setText(s, NotificationType::dontSendNotification);
+	annotationLabel->setColour(Label::textColourId, c);
 }
 
 void NeuropixInterface::buttonClicked(Button* button)
@@ -438,9 +505,15 @@ void NeuropixInterface::buttonClicked(Button* button)
 		{
 			if (channelSelectionState[i] == 1) // channel is currently selected
 			{
-				if (channelStatus[i] > -1) // channel can be turned on
+
+				if (channelStatus[i] != -1) // channel can be turned on
 				{
-					channelStatus.set(i, 1); // turn channel on
+					if (channelStatus[i] > -1) // not a reference
+						channelStatus.set(i, 1); // turn channel on
+					else
+						channelStatus.set(i, -2); // turn channel on
+
+					thread->selectElectrode(getChannelForElectrode(i), getConnectionForChannel(i));
 
 					int startPoint;
 					int jump;
@@ -464,10 +537,13 @@ void NeuropixInterface::buttonClicked(Button* button)
 						{
 							//std::cout << "  In range" << std::endl;
 
-							if (channelStatus[newChan] > -1)
+							if (channelStatus[newChan] != -1)
 							{
 								//std::cout << "    Turning off." << std::endl;
-								channelStatus.set(newChan, 0); // turn connected channel off
+								if (channelStatus[i] > -1) // not a reference
+									channelStatus.set(newChan, 0); // turn connected channel off
+								else
+									channelStatus.set(newChan, -3); // turn connected channel off
 							}
 						}
 					}
@@ -475,9 +551,56 @@ void NeuropixInterface::buttonClicked(Button* button)
 			}
 		}
 
+		updateAvailableRefs();
+
+		repaint();
+	} else if (button == outputOnButton)
+	{
+		for (int i = 0; i < 966; i++)
+		{
+			if (channelSelectionState[i] == 1)
+				channelOutput.set(i, 1);
+		}
+
+		repaint();
+	} else if (button == outputOffButton)
+	{
+		for (int i = 0; i < 966; i++)
+		{
+			if (channelSelectionState[i] == 1)
+				channelOutput.set(i, 0);
+		}
+		repaint();
+	} else if (button == annotationButton)
+	{
+		//Array<int> a = getSelectedChannels();
+
+		//if (a.size() > 0)
+		String s = annotationLabel->getText();
+		Array<int> a = getSelectedChannels();
+		//Annotation a = Annotation(, getSelectedChannels());
+
+		if (a.size() > 0)
+			annotations.add(Annotation(s, a, colorSelector->getCurrentColour()));
+
 		repaint();
 	}
 	
+}
+
+Array<int> NeuropixInterface::getSelectedChannels()
+{
+	Array<int> a;
+
+	for (int i = 0; i < 966; i++)
+	{
+		if (channelSelectionState[i] == 1)
+		{
+			a.add(i);
+		}
+	}
+
+	return a;
 }
 
 void NeuropixInterface::setOption(int o)
@@ -517,18 +640,30 @@ void NeuropixInterface::setOption(int o)
 		}
 	}
 
-	Array<int> refs;
+	int totalRefs;
 
 	if (option < 3)
+	{
 		refs = option1and2refs;
+		totalRefs = 10;
+	}
 	else if (option == 3)
+	{
 		refs = option3refs;
+		totalRefs = 10;
+	}
 	else
+	{
 		refs = option4refs;
+		totalRefs = 7;
+	}
 
 	for (int i = 0; i < refs.size(); i++)
 	{
-		channelStatus.set(refs[i]-1, -2);
+		if (i < totalRefs)
+			channelStatus.set(refs[i]-1, -2);
+		else
+			channelStatus.set(refs[i]-1, -3);
 	}
 
 	if (option < 3)
@@ -538,8 +673,24 @@ void NeuropixInterface::setOption(int o)
 		enableButton->setEnabledState(true);
 	}
 
+	updateAvailableRefs();
 
 	repaint();
+}
+
+void NeuropixInterface::updateAvailableRefs()
+{
+	referenceComboBox->clear(NotificationType::dontSendNotification);
+
+	referenceComboBox->addItem("Ext", 1);
+
+	for (int i = 0; i < refs.size(); i++)
+	{
+		if (channelStatus[refs[i]-1] == -2)
+			referenceComboBox->addItem(String(refs[i]),i+2);
+	}
+
+	referenceComboBox->setSelectedId(1);
 }
 
 void NeuropixInterface::mouseMove(const MouseEvent& event)
@@ -621,6 +772,7 @@ void NeuropixInterface::mouseMove(const MouseEvent& event)
 			repaint();
 		}
 	}
+
 }
 
 int NeuropixInterface::getNearestChannel(int x, int y)
@@ -643,9 +795,13 @@ String NeuropixInterface::getChannelInfoString(int chan)
 	a += String(chan + 1);
 	a += "\n\nType: ";
 	
-	if (channelStatus[chan] == -2)
+	if (channelStatus[chan] < -1)
 	{
 		a += "REF";
+		if (channelStatus[chan] == -2)
+			a += "\nEnabled";
+		else
+			a += "\nDisabled";
 		return a;
 	}
 	else
@@ -690,29 +846,97 @@ void NeuropixInterface::mouseDown(const MouseEvent& event)
 
 	//std::cout << event.x << std::endl;
 
-	if (event.x > 150 && event.x < 400)
+	if (!event.mods.isRightButtonDown())
 	{
-
-		if (!event.mods.isShiftDown())
+		if (event.x > 150 && event.x < 400)
 		{
-			for (int i = 0; i < 966; i++)
-				channelSelectionState.set(i, 0);
-		}
 
-		if (event.x > 225 - channelHeight && event.x < 225 + channelHeight)
-		{
-			int chan = getNearestChannel(event.x, event.y);
-
-			//std::cout << chan << std::endl;
-
-			if (chan >= 0 && chan < 966)
+			if (!event.mods.isShiftDown())
 			{
-				channelSelectionState.set(chan, 1);
+				for (int i = 0; i < 966; i++)
+					channelSelectionState.set(i, 0);
 			}
 
+			if (event.x > 225 - channelHeight && event.x < 225 + channelHeight)
+			{
+				int chan = getNearestChannel(event.x, event.y);
+
+				//std::cout << chan << std::endl;
+
+				if (chan >= 0 && chan < 966)
+				{
+					channelSelectionState.set(chan, 1);
+				}
+
+			}
+			repaint();
 		}
-		repaint();
+	} else {
+
+		if (event.x > 225 + 10 && event.x < 225 + 150)
+		{
+			int currentAnnotationNum;
+
+			for (int i = 0; i < annotations.size(); i++)
+			{
+				Annotation& a = annotations.getReference(i);
+				float yLoc = a.currentYLoc;
+
+				if (float(event.y) < yLoc && float(event.y) > yLoc - 12)
+				{
+					currentAnnotationNum = i;
+					break;
+				} else {
+					currentAnnotationNum = -1;
+				}
+			}
+
+			if (currentAnnotationNum > -1)
+			{
+				PopupMenu annotationMenu;
+
+		        annotationMenu.addItem(1, "Delete annotation", true);
+
+				const int result = annotationMenu.show();
+		        
+		        switch (result)
+		        {
+		        	case 0:
+		        		break;
+		            case 1:
+		                annotations.removeRange(currentAnnotationNum,1);
+		                repaint();
+		                break;
+		            default:
+
+		            	break;
+				}
+			}
+			
+		}
+
+		
+
+		// if (event.x > 225 - channelHeight && event.x < 225 + channelHeight)
+		// {
+		// 	PopupMenu annotationMenu;
+
+	 //        annotationMenu.addItem(1, "Add annotation", true);
+		// 	const int result = annotationMenu.show();
+	        
+	 //        switch (result)
+	 //        {
+	 //            case 1:
+	 //                std::cout << "Annotate!" << std::endl;
+	 //                break;
+	 //            default:
+	 //            	break;
+		// 	}
+		// }
+
 	}
+
+	
 }
 
 void NeuropixInterface::mouseDrag(const MouseEvent& event)
@@ -920,6 +1144,9 @@ void NeuropixInterface::paint(Graphics& g)
 		
 	}
 
+	// draw annotations
+	drawAnnotations(g);
+
 	// draw borders around zoom area
 
 	g.setColour(Colours::darkgrey.withAlpha(0.7f));
@@ -970,6 +1197,73 @@ void NeuropixInterface::paint(Graphics& g)
 
 }
 
+void NeuropixInterface::drawAnnotations(Graphics& g)
+{
+	for (int i = 0; i < annotations.size(); i++)
+	{
+		bool shouldAppear = false;
+
+		Annotation& a = annotations.getReference(i);
+
+		for (int j = 0; j < a.channels.size(); j++)
+		{
+			if (j > lowestChan || j < highestChan)
+			{
+				shouldAppear = true;
+				break;
+			}
+		}	
+	
+		if (shouldAppear)
+		{
+			float xLoc = 225 + 30;
+			int ch = a.channels[0];
+
+			float midpoint = lowerBound / 2 + 8;
+
+			float yLoc = lowerBound - ((ch - lowestChan - (ch % 2)) / 2 * channelHeight) + 10;
+
+			//if (abs(yLoc - midpoint) < 200)
+			yLoc = (midpoint + 3*yLoc)/4;
+			a.currentYLoc = yLoc;
+
+			float alpha;
+
+			if (yLoc > lowerBound - 250)
+				alpha = (lowerBound - yLoc)/(250.f);
+			else if (yLoc < 250)
+				alpha = 1.0f - (250.f - yLoc)/200.f;
+			else
+				alpha = 1.0f;
+
+			if (alpha < 0)
+				alpha = -alpha;
+
+			if (alpha < 0)
+				alpha = 0;
+
+			if (alpha > 1.0f)
+				alpha = 1.0f;
+
+			//float distFromMidpoint = yLoc - midpoint;
+			//float ratioFromMidpoint = pow(distFromMidpoint / midpoint,1);
+
+			//if (a.isMouseOver)
+			//	g.setColour(Colours::yellow.withAlpha(alpha));
+			//else 
+			g.setColour(a.colour.withAlpha(alpha));
+
+			g.drawMultiLineText(a.text, xLoc + 2, yLoc, 150);
+
+			float xLoc2 = 225 - channelHeight * (1 - (ch % 2)) + channelHeight / 2;
+			float yLoc2 = lowerBound - ((ch - lowestChan - (ch % 2)) / 2 * channelHeight) + channelHeight / 2;
+
+			g.drawLine(xLoc - 5, yLoc - 3, xLoc2, yLoc2);
+			g.drawLine(xLoc - 5, yLoc - 3, xLoc, yLoc - 3);
+		}
+	}
+}
+
 void NeuropixInterface::drawLegend(Graphics& g)
 {
 	g.setColour(Colour(55, 55, 55));
@@ -983,21 +1277,29 @@ void NeuropixInterface::drawLegend(Graphics& g)
 		case 0: // ENABLED STATE
 			g.drawMultiLineText("ENABLED?", xOffset, yOffset, 200);
 			g.drawMultiLineText("YES", xOffset+30, yOffset+22, 200);
-			g.drawMultiLineText("NO", xOffset+30, yOffset+42, 200);
-			g.drawMultiLineText("N/A", xOffset+30, yOffset+62, 200);
-			g.drawMultiLineText("REF", xOffset+30, yOffset+82, 200);
+			g.drawMultiLineText("X OUT", xOffset+30, yOffset+42, 200);
+			g.drawMultiLineText("X IN", xOffset+30, yOffset+62, 200);
+			g.drawMultiLineText("N/A", xOffset+30, yOffset+82, 200);
+			g.drawMultiLineText("AVAIL REF", xOffset+30, yOffset+102, 200);
+			g.drawMultiLineText("X REF", xOffset+30, yOffset+122, 200);
 
 			g.setColour(Colours::yellow);
 			g.fillRect(xOffset+10, yOffset + 10, 15, 15);
 
-			g.setColour(Colours::orange);
+			g.setColour(Colours::goldenrod);
 			g.fillRect(xOffset+10, yOffset + 30, 15, 15);
 
-			g.setColour(Colours::grey);
+			g.setColour(Colours::maroon);
 			g.fillRect(xOffset+10, yOffset + 50, 15, 15);
 
-			g.setColour(Colours::black);
+			g.setColour(Colours::grey);
 			g.fillRect(xOffset+10, yOffset + 70, 15, 15);
+
+			g.setColour(Colours::black);
+			g.fillRect(xOffset+10, yOffset + 90, 15, 15);
+
+			g.setColour(Colours::brown);
+			g.fillRect(xOffset+10, yOffset + 110, 15, 15);
 
 			break;
 
@@ -1038,12 +1340,13 @@ void NeuropixInterface::drawLegend(Graphics& g)
 		case 3: // REFERENCE
 			g.drawMultiLineText("REFERENCE", xOffset, yOffset, 200);
 
-			for (int i = 0; i < 11; i++)
+			for (int i = 0; i < referenceComboBox->getNumItems(); i++)
 			{
-				g.drawMultiLineText(String(i), xOffset+30, yOffset+22 + 20*i, 200);
+				g.drawMultiLineText(referenceComboBox->getItemText(i), xOffset+30, yOffset+22 + 20*i, 200);
 			}
 
-			for (int i = 0; i < 11; i++)
+
+			for (int i = 0; i < referenceComboBox->getNumItems(); i++)
 			{
 				g.setColour(Colour(20*i,200,20*i));
 				g.fillRect(xOffset+10, yOffset + 10 + 20*i, 15, 15);
@@ -1063,18 +1366,21 @@ Colour NeuropixInterface::getChannelColour(int i)
 		} 
 		else if (channelStatus[i] == 0) // disabled
 		{
-			return Colours::orange;
+			return Colours::maroon;
 		} 
 		else if (channelStatus[i] == 1) // enabled
 		{
-			return Colours::yellow;
+			if (channelOutput[i] == 1)
+				return Colours::yellow;
+			else
+				return Colours::goldenrod;
 		} 
 		else if (channelStatus[i] == -2) // reference
 		{
 			return Colours::black;
 		} else 
 		{
-			return Colours::green; // wtf?
+			return Colours::brown; // non-selectable reference
 		}
 	} else if (visualizationMode == 1) // AP GAIN
 	{
@@ -1082,7 +1388,7 @@ Colour NeuropixInterface::getChannelColour(int i)
 		{
 			return Colours::grey;
 		} 
-		else if (channelStatus[i] == -2) // reference
+		else if (channelStatus[i] < -1) // reference
 		{
 			return Colours::black;
 		}
@@ -1096,7 +1402,7 @@ Colour NeuropixInterface::getChannelColour(int i)
 		{
 			return Colours::grey;
 		} 
-		else if (channelStatus[i] == -2) // reference
+		else if (channelStatus[i] < -1) // reference
 		{
 			return Colours::black;
 		}
@@ -1110,7 +1416,7 @@ Colour NeuropixInterface::getChannelColour(int i)
 		{
 			return Colours::grey;
 		} 
-		else if (channelStatus[i] == -2) // reference
+		else if (channelStatus[i] < -1) // reference
 		{
 			return Colours::black;
 		}
@@ -1121,4 +1427,145 @@ Colour NeuropixInterface::getChannelColour(int i)
 	}
 
 	
+}
+
+int NeuropixInterface::getChannelForElectrode(int ch)
+{
+	// returns actual mapped channel for individual electrode
+	if (option < 3)
+	{
+		if (ch < 383)
+			return ch; // channels are linear
+		else
+			return -1; // channel doesn't exist on probe
+
+	} else if (option == 3)
+	{
+		if (ch < 384)
+			return ch;
+		else if (ch >= 384 && ch < 384)
+			return ch - 384;
+		else
+			return ch - 384 * 2;
+	} else if (option == 4)
+	{
+		if (ch < 276)
+			return ch;
+		else if (ch >= 276 && ch < 552)
+			return ch - 276;
+		else if (ch >= 552 && ch < 828)
+			return ch - 276 * 2;
+		else
+			return ch - 276 * 3;
+	}
+}
+
+int NeuropixInterface::getConnectionForChannel(int ch)
+{
+	if (option == 3)
+	{
+		if (ch < 384)
+			return 0;
+		else if (ch >= 384 && ch < 384)
+			return 1;
+		else
+			return 2;
+	} else if (option == 4)
+	{
+		if (ch < 276)
+			return 0;
+		else if (ch >= 276 && ch < 552)
+			return 1;
+		else if (ch >= 552 && ch < 828)
+			return 2;
+		else
+			return 3;
+	}
+}
+
+// --------------------------------------
+
+Annotation::Annotation(String t, Array<int> chans, Colour c)
+{
+	text = t;
+	channels = chans;
+
+	currentYLoc = -100.f;
+
+	isMouseOver = false;
+	isSelected = false;
+
+	colour = c;
+}
+
+Annotation::~Annotation()
+{
+
+}
+
+// ---------------------------------------
+
+ColorSelector::ColorSelector(NeuropixInterface* np)
+{
+	npi = np;
+	Path p;
+	p.addRoundedRectangle(0,0,15,15,3);
+
+	standardColors.add(Colours::lightgrey);
+	standardColors.add(Colours::darkseagreen);
+	standardColors.add(Colours::orange);
+	standardColors.add(Colours::turquoise);
+	standardColors.add(Colours::khaki);
+	standardColors.add(Colours::violet);
+
+	hoverColors.add(Colours::grey);
+	hoverColors.add(Colours::seagreen);
+	hoverColors.add(Colours::darkorange);
+	hoverColors.add(Colours::darkturquoise);
+	hoverColors.add(Colours::darkkhaki);
+	hoverColors.add(Colours::darkviolet);
+
+	for (int i = 0; i < 6; i++)
+	{
+		buttons.add(new ShapeButton(String(i), standardColors[i], hoverColors[i], hoverColors[i]));
+		buttons[i]->setShape(p, true, true, false);
+		buttons[i]->setBounds(18*i,0,15,15);
+		buttons[i]->addListener(this);
+		addAndMakeVisible(buttons[i]);
+	}
+
+	strings.add("Annotation 1");
+	strings.add("Annotation 2");
+	strings.add("Annotation 3");
+	strings.add("Annotation 4");
+	strings.add("Annotation 5");
+	strings.add("Annotation 6");
+
+	npi->setAnnotationLabel(strings[0], standardColors[0]);
+
+	activeButton = 0;
+
+}
+
+ColorSelector::~ColorSelector()
+{
+
+
+}
+
+void ColorSelector::buttonClicked(Button* b)
+{
+	activeButton = buttons.indexOf((ShapeButton*) b);
+
+	npi->setAnnotationLabel(strings[activeButton], standardColors[activeButton]);
+}
+
+void ColorSelector::updateCurrentString(String s)
+{
+	strings.set(activeButton, s);
+}
+
+Colour ColorSelector::getCurrentColour()
+{
+	return standardColors[activeButton];
 }

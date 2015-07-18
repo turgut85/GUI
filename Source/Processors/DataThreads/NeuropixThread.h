@@ -78,6 +78,18 @@ public:
     /** Returns the number of event channels of the data source.*/
 	int getNumEventChannels();
 
+	/** Selects which electrode is connected to each channel. */
+	void selectElectrode(int chNum, int connection);
+
+	/** Selects which reference is used for each channel. */
+	void setReference(int chNum, int refSetting);
+
+	/** Sets the gain for each channel. */
+	void setGain(int ch, int apGain, int lfpGain);
+
+	/** Sets the gain for each channel. */
+	void setFilter(int filter);
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NeuropixThread);
 

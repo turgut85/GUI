@@ -31,6 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class NeuropixCanvas;
 class NeuropixInterface;
+class Annotation;
+class ColorSelector;
 
 /**
 
@@ -47,9 +49,6 @@ public:
     NeuropixEditor(GenericProcessor* parentNode, NeuropixThread* thread, bool useDefaultParameterEditors);
     virtual ~NeuropixEditor();
 
-    //void buttonEvent(Button* button);
-    //virtual void sliderValueChanged(Slider* slider);
-    //virtual void comboBoxChanged(ComboBox* comboBoxThatHasChanged);
     void comboBoxChanged(ComboBox* comboBox);
 
     void saveEditorParameters(XmlElement*);
@@ -58,14 +57,11 @@ public:
     Visualizer* createNewCanvas(void);
 
 private:
-    //ScopedPointer<Label> volLabel;
-    //ScopedPointer<Slider> volSlider;
-    //ScopedPointer<Label> chanLabel;
+
     ScopedPointer<ComboBox> optionComboBox;
-    //ScopedPointer<Label> samplerateLabel;
-    //ScopedPointer<Label> samplerateValueLabel;
     Viewport* viewport;
     NeuropixCanvas* canvas;
+    NeuropixThread* thread;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NeuropixEditor);
 
@@ -74,7 +70,7 @@ private:
 class NeuropixCanvas : public Visualizer, public Button::Listener
 {
 public:
-	NeuropixCanvas(GenericProcessor* p);
+	NeuropixCanvas(GenericProcessor* p, NeuropixThread* thread);
 	~NeuropixCanvas();
 
 	void paint(Graphics& g);
@@ -101,10 +97,10 @@ public:
 
 };
 
-class NeuropixInterface: public Component, public Button::Listener, public ComboBox::Listener
+class NeuropixInterface: public Component, public Button::Listener, public ComboBox::Listener, public Label::Listener
 {
 public:
-	NeuropixInterface();
+	NeuropixInterface(NeuropixThread*);
 	~NeuropixInterface();
 
 	void setOption(int);
@@ -120,10 +116,14 @@ public:
 
     void buttonClicked(Button*);
     void comboBoxChanged(ComboBox*);
+    void labelTextChanged(Label* l);
+
+    void setAnnotationLabel(String, Colour);
 
 private:
 	int option;
-	//NeuropixThread* thread;
+
+	NeuropixThread* thread;
 
 	ScopedPointer<ComboBox> lfpGainComboBox;
 	ScopedPointer<ComboBox> apGainComboBox;
@@ -137,21 +137,32 @@ private:
 	ScopedPointer<Label> apGainLabel;
 	ScopedPointer<Label> referenceLabel;
 	ScopedPointer<Label> filterLabel;
+	ScopedPointer<Label> outputLabel;
+	ScopedPointer<Label> annotationLabelLabel;
+	ScopedPointer<Label> annotationLabel;
 
 	ScopedPointer<UtilityButton> enableViewButton;
 	ScopedPointer<UtilityButton> lfpGainViewButton;
 	ScopedPointer<UtilityButton> apGainViewButton;
 	ScopedPointer<UtilityButton> referenceViewButton;
+	ScopedPointer<UtilityButton> outputOnButton;
+	ScopedPointer<UtilityButton> outputOffButton;
+	ScopedPointer<UtilityButton> annotationButton;
+
+	ScopedPointer<ColorSelector> colorSelector;
 	
 	Array<int> channelStatus;
 	Array<int> channelReference;
 	Array<int> channelApGain;
 	Array<int> channelLfpGain;
+	Array<int> channelOutput;
 	Array<int> channelSelectionState;
 
 	Array<int> option1and2refs;
 	Array<int> option3refs;
 	Array<int> option4refs;
+
+	Array<int> refs;
 
 	bool isOverZoomRegion;
 	bool isOverUpperBorder;
@@ -186,8 +197,59 @@ private:
 	String getChannelInfoString(int chan);
 
 	void drawLegend(Graphics& g);
+	void drawAnnotations(Graphics& g);
+
+	void updateAvailableRefs();
+
+	Array<Annotation> annotations;
+
+	Array<int> getSelectedChannels();
+
+	int getChannelForElectrode(int);
+	int getConnectionForChannel(int);
 
 };
 
+class Annotation
+{
+public:
+	Annotation(String text, Array<int> channels, Colour c);
+	~Annotation();
+
+	Array<int> channels;
+	String text;
+
+	float currentYLoc;
+
+	bool isMouseOver;
+	bool isSelected;
+
+	Colour colour;
+
+};
+
+class ColorSelector : public Component, public ButtonListener
+{
+public:
+	ColorSelector(NeuropixInterface* np);
+	~ColorSelector();
+
+	Array<Colour> standardColors;
+	Array<Colour> hoverColors;
+	StringArray strings;
+
+	OwnedArray<ShapeButton> buttons;
+
+	void buttonClicked(Button* button);
+
+	void updateCurrentString(String s);
+
+	Colour getCurrentColour();
+
+	NeuropixInterface* npi;
+
+	int activeButton;
+
+};
 
 #endif  // NEUROPIXEDITOR_H_INCLUDED
