@@ -1348,7 +1348,7 @@ void NeuropixInterface::drawLegend(Graphics& g)
 
 			for (int i = 0; i < referenceComboBox->getNumItems(); i++)
 			{
-				g.setColour(Colour(20*i,200,20*i));
+				g.setColour(Colour(200-10*i, 110-10*i, 20*i));
 				g.fillRect(xOffset+10, yOffset + 10 + 20*i, 15, 15);
 			}
 
@@ -1422,7 +1422,7 @@ Colour NeuropixInterface::getChannelColour(int i)
 		}
 		else
 		{
-			return Colour(20*channelReference[i], 200, 20*channelReference[i]);
+			return Colour(200-10*channelReference[i], 110-10*channelReference[i], 20*channelReference[i]);
 		} 
 	}
 
@@ -1511,19 +1511,12 @@ ColorSelector::ColorSelector(NeuropixInterface* np)
 	Path p;
 	p.addRoundedRectangle(0,0,15,15,3);
 
-	standardColors.add(Colours::lightgrey);
-	standardColors.add(Colours::darkseagreen);
-	standardColors.add(Colours::orange);
-	standardColors.add(Colours::turquoise);
-	standardColors.add(Colours::khaki);
-	standardColors.add(Colours::violet);
-
-	hoverColors.add(Colours::grey);
-	hoverColors.add(Colours::seagreen);
-	hoverColors.add(Colours::darkorange);
-	hoverColors.add(Colours::darkturquoise);
-	hoverColors.add(Colours::darkkhaki);
-	hoverColors.add(Colours::darkviolet);
+	for (int i = 0; i < 6; i++)
+	{
+		standardColors.add(Colour(245, 245, 245 - 40*i));
+		hoverColors.add(   Colour(215, 215, 215 - 40*i));
+	}
+		
 
 	for (int i = 0; i < 6; i++)
 	{
