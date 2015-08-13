@@ -38,7 +38,7 @@ NeuropixEditor::NeuropixEditor(GenericProcessor* parentNode, NeuropixThread* t, 
 	{
 		optionComboBox->addItem("Option " + String(k),k);
 	}
-	optionComboBox->setSelectedId(1);
+	optionComboBox->setSelectedId(1, dontSendNotification);
 	addAndMakeVisible(optionComboBox);
 
 	thread = t;
