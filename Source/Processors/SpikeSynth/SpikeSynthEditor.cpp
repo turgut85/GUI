@@ -31,7 +31,7 @@ SpikeSynthEditor::SpikeSynthEditor(GenericProcessor* parentNode, bool useDefault
     : GenericEditor(parentNode, useDefaultParameterEditors)
 
 {
-	desiredWidth = 300;
+	desiredWidth = 150;
 
 }
 

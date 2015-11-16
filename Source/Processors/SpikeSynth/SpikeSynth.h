@@ -72,6 +72,8 @@ public:
     /** Called after acquisition is finished. */
     bool disable();
 
+    void updateWaveforms();
+
     /** Creates the SpikeDetectorEditor. */
     AudioProcessorEditor* createEditor();
 
@@ -81,13 +83,14 @@ public:
     /** Extra samples are placed in this buffer to allow seamless
         transitions between callbacks. */
     AudioSampleBuffer synthBuffer;
+    AudioSampleBuffer waveformBuffer;
 
     void saveCustomParametersToXml(XmlElement* parentElement);
     void loadCustomParametersFromXml();
 
 private:
   
-
+	int numElectrodes;
     int sampleIndex;
 
     void handleEvent(int eventType, MidiMessage& event, int sampleNum);
