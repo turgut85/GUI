@@ -27,10 +27,12 @@
 #include "../../../JuceLibraryCode/JuceHeader.h"
 #include "../Editors/GenericEditor.h"
 #include "../Editors/ElectrodeButtons.h"
+#include "../SpikeDetector/SpikeDetectorEditor.h"
 
 
 class TriangleButton;
 class UtilityButton;
+class ADSRInterface;
 
 /**
 
@@ -53,12 +55,30 @@ public:
     void labelTextChanged(Label* label);
     void comboBoxChanged(ComboBox* comboBox);
 
+    ScopedPointer<Label> startNoteLabel;
+    ScopedPointer<Label> modeLabel;
+    ScopedPointer<ComboBox> startNoteComboBox;
+    ScopedPointer<ComboBox> modeComboBox;
+    ScopedPointer<ThresholdSlider> thresholdSlider;
+
+    ScopedPointer<ADSRInterface> adsrInterface;
+
 private:
+
+	Array<Array<float>> frequencies;
+	Array<Array<float>> modes;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeSynthEditor);
 
 };
 
+class ADSRInterface : public Component
+{
+public:
+	ADSRInterface();
+	virtual ~ADSRInterface();
 
+	void paint(Graphics& g);
+};
 
 #endif  // SPIKESYNTHEDITOR_H_INCLUDED
