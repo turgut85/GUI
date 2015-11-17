@@ -121,6 +121,11 @@ SpikeSynthEditor::SpikeSynthEditor(GenericProcessor* parentNode, bool useDefault
     Array<double> v;
     thresholdSlider->setValues(v);
 
+    modeLabel = new Label("Threshold:","Threshold:");
+    modeLabel->setBounds(100, 30, 90, 15);
+    modeLabel->setColour(Label::textColourId, Colours::darkgrey);
+    addAndMakeVisible(modeLabel);
+
     adsrInterface = new ADSRInterface();
     adsrInterface->setBounds(170, 40, 110, 75);
     addAndMakeVisible(adsrInterface);
@@ -178,7 +183,6 @@ void ADSRInterface::paint(Graphics& g)
 	float decay = 50; // ms
 	float sustain = 0.8; // fraction
 	float release = 50; // ms
-
 
 	g.fillAll(Colours::darkgrey);
 

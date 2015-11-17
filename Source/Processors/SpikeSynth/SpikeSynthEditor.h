@@ -57,6 +57,7 @@ public:
 
     ScopedPointer<Label> startNoteLabel;
     ScopedPointer<Label> modeLabel;
+    ScopedPointer<Label> thresholdLabel;
     ScopedPointer<ComboBox> startNoteComboBox;
     ScopedPointer<ComboBox> modeComboBox;
     ScopedPointer<ThresholdSlider> thresholdSlider;
