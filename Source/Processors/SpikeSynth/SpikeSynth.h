@@ -93,6 +93,17 @@ private:
 	int numElectrodes;
     int sampleIndex;
 
+    Array<float> frequencies;
+	Array<int> ionian, dorian, phrygian, lydian, mixolydian, aeolian, locrian;
+
+	int startFreq;
+	int modeID;
+	int noteLength;
+	float threshold;
+	float attack, decay, sustain, release;
+
+	bool checkThreshold(SpikeObject& s);
+
     void handleEvent(int eventType, MidiMessage& event, int sampleNum);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeSynth);

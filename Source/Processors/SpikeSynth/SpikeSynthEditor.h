@@ -33,6 +33,7 @@
 class TriangleButton;
 class UtilityButton;
 class ADSRInterface;
+class SpikeSynth;
 
 /**
 
@@ -52,8 +53,10 @@ public:
     SpikeSynthEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
     virtual ~SpikeSynthEditor();
     void buttonEvent(Button* button);
+    void sliderEvent(Slider* slider);
     void labelTextChanged(Label* label);
     void comboBoxChanged(ComboBox* comboBox);
+
 
     ScopedPointer<Label> startNoteLabel;
     ScopedPointer<Label> modeLabel;
@@ -66,8 +69,7 @@ public:
 
 private:
 
-	Array<Array<float>> frequencies;
-	Array<Array<float>> modes;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeSynthEditor);
 
@@ -76,10 +78,12 @@ private:
 class ADSRInterface : public Component
 {
 public:
-	ADSRInterface();
+	ADSRInterface(SpikeSynth*);
 	virtual ~ADSRInterface();
 
 	void paint(Graphics& g);
+private:
+	SpikeSynth* processor;
 };
 
 #endif  // SPIKESYNTHEDITOR_H_INCLUDED
