@@ -26,7 +26,7 @@
 
 SpikeSynth::SpikeSynth()
     : GenericProcessor("Spike Synth"),
-      synthBuffer(2, 10000), noteLength(1000), threshold(100)
+      synthBuffer(1, 80000), overflowBuffer(1, 80000), noteLength(100.0f), threshold(40)
 {
     
     float octave0 [12] = {16.35, 17.32, 18.35, 19.45, 20.60, 21.83, 23.12, 24.50, 25.96, 27.50, 29.14, 30.87};
@@ -53,8 +53,10 @@ SpikeSynth::SpikeSynth()
     	locrian.add(g[i]);
     }
 
-    startFreq = 2;
-    modeID = 2;
+    startFreq = 0;
+    modeID = 0;
+    
+
 }
 
 SpikeSynth::~SpikeSynth()
@@ -90,7 +92,7 @@ void SpikeSynth::updateSettings()
 
 bool SpikeSynth::enable()
 {
-
+	overflowBufferIndex = 0;
 }
 
 bool SpikeSynth::disable()
@@ -100,7 +102,17 @@ bool SpikeSynth::disable()
 
 void SpikeSynth::updateWaveforms()
 {
-	waveformBuffer.setSize(numElectrodes, noteLength);
+
+	noteLength = 250.0f; // ms
+    attack = 25.0; // ms
+    decay = 25.0; // ms
+    sustain = 0.2; // fraction
+    release = 200.0; // ms
+
+    std::cout << "Sample rate: " << getSampleRate() << std::endl;
+
+	waveformBuffer.setSize(numElectrodes, (int) (noteLength / 1000.0f * getSampleRate()));
+	waveformBuffer.clear();
 
     for (int i = 0; i < numElectrodes; i++)
     {
@@ -131,23 +143,57 @@ void SpikeSynth::updateWaveforms()
     	int noteNum = mode[i % 7];
 
     	float freq = frequencies[noteNum] * pow(2, startFreq + i/7);
-    	std::cout << "Note number: " << noteNum << ", freq: " << freq << std::endl;
+    	//std::cout << "Note number: " << noteNum << ", freq: " << freq << std::endl;
 
     	// create saw waves at each frequency:
     	int period = (int) ((1./freq) * getSampleRate());
     	int n = 0;
     	float a;
-    	while (n < noteLength)
+
+    	while (n < waveformBuffer.getNumSamples())
     	{
-    		a = 0.5 - (n % period) / float(period);
-    		waveformBuffer.setSample(i, n, a*2);
+    		if (n < period / 2)
+    			a = 0.25 - (n % period) / float(period);
+    		else
+    			a = (n % period) / float(period) - 0.75;
+    		//else if (n > waveformBuffer.getNu)
+    		//a = 0.5 - (n % period) / float(period);
+    		//if (a > 0.5)
+    		//	a = 1 - a;
+    		//a -= 0.5;
+
+    		waveformBuffer.setSample(i, n, a*30);
     		n++;
     	}
-
-    	// ADSR (simplified for now):
-    	waveformBuffer.applyGainRamp(0, 100, 0.0, 1.0);
-    	waveformBuffer.applyGainRamp(noteLength-100, 100, 1.0, 0.0);
     }
+
+
+    // Create waveform envelope:
+	std::cout << "Waveform size: " << waveformBuffer.getNumSamples() << std::endl;
+
+	int startIndex = 0;
+	int endIndex = (int) (attack / 1000.0f * getSampleRate());
+	std::cout << "Attack: " << startIndex << " to " << endIndex << std::endl;
+	waveformBuffer.applyGainRamp(startIndex, endIndex - startIndex, 0.0, 1.0);
+
+	startIndex = endIndex;
+	endIndex += (int) (decay / 1000.0f * getSampleRate());
+	std::cout << "Decay: " << startIndex << " to " << endIndex << std::endl;
+	waveformBuffer.applyGainRamp(startIndex, endIndex - startIndex, 1.0, sustain);
+
+	startIndex = endIndex;
+	endIndex = waveformBuffer.getNumSamples() - (int) (release / 1000.0f * getSampleRate());
+	std::cout << "Sustain: " << startIndex << " to " << endIndex << std::endl;
+	waveformBuffer.applyGainRamp(startIndex, endIndex - startIndex, sustain, sustain);
+
+	startIndex = endIndex;
+	endIndex = waveformBuffer.getNumSamples();
+	std::cout << "Release: " << startIndex << " to " << endIndex << std::endl;
+	waveformBuffer.applyGainRamp(startIndex, endIndex - startIndex, sustain, 0.0);
+
+
+    synthBuffer.clear();
+    overflowBuffer.clear();
 }
 
 AudioProcessorEditor* SpikeSynth::createEditor()
@@ -159,11 +205,45 @@ AudioProcessorEditor* SpikeSynth::createEditor()
 
 void SpikeSynth::saveCustomParametersToXml(XmlElement* parentElement)
 {
+    XmlElement* params = parentElement->createNewChildElement("PARAMETERS");
+    params->setAttribute("startFreq", startFreq);\
+    params->setAttribute("modeID", modeID);
+    params->setAttribute("threshold", threshold);
+    params->setAttribute("attack", attack);
+    params->setAttribute("decay", decay);
+    params->setAttribute("sustain", sustain);
+    params->setAttribute("release", release);
 
 }
 
 void SpikeSynth::loadCustomParametersFromXml()
 {
+
+	if (parametersAsXml != nullptr) // prevent double-loading
+    {
+        // use parametersAsXml to restore state
+
+		SpikeSynthEditor* ed = (SpikeSynthEditor*) getEditor();
+
+        forEachXmlChildElement(*parametersAsXml, xmlNode)
+        {
+	        if (xmlNode->hasTagName("PARAMETERS"))
+	        {
+	            startFreq = xmlNode->getIntAttribute("startFreq", 1);
+				modeID = xmlNode->getIntAttribute("modeID", 1);
+				threshold = xmlNode->getDoubleAttribute("threshold", 0.0);
+				attack = xmlNode->getDoubleAttribute("attack", 20.0);
+				decay = xmlNode->getDoubleAttribute("decay", 20.0);
+				sustain = xmlNode->getDoubleAttribute("sustain", 0.5);
+				release = xmlNode->getDoubleAttribute("release", 20.0);
+
+				std::cout << "START NOTE = " << startFreq << std::endl;
+
+		    	ed->setParams(startFreq, modeID, threshold, attack, decay, sustain, release);
+
+	        }
+	    }
+    }
 
 }
 
@@ -220,13 +300,13 @@ void SpikeSynth::handleEvent(int eventType, MidiMessage& event, int sampleNum)
             	{
 
 	                int electrodeNum = newSpike.source;
-	                float gain = 1.0; // scale to spike amplitude?
+	                float gain = 2.0; // scale to spike amplitude?
 
 	                if (sampleNum < synthBuffer.getNumSamples())
 	                	//std::cout << sampleNum << ", " << electrodeNum << std::endl;
 	                	//std::cout << synthBuffer.getNumSamples() << ", " << synthBuffer.getNumChannels() << std::endl;
 	                	//std::cout << waveformBuffer.getNumSamples() << ", " << waveformBuffer.getNumChannels() << std::endl;
-	                	synthBuffer.addFrom(0, sampleNum, waveformBuffer, electrodeNum, 0, 1000, gain);
+	                	synthBuffer.addFrom(0, sampleNum, waveformBuffer, electrodeNum, 0, waveformBuffer.getNumSamples(), gain);
 	            	}
             }
 
@@ -251,11 +331,19 @@ bool SpikeSynth::checkThreshold(SpikeObject& s)
 
 void SpikeSynth::process(AudioSampleBuffer& buffer, MidiBuffer& events)
 {
-	synthBuffer.clear();
+	
+	synthBuffer.copyFrom(0, 0, overflowBuffer, overflowBufferIndex, 0, synthBuffer.getNumSamples());
+	overflowBuffer.clear();
 
 	checkForEvents(events);
 
-	buffer.copyFrom(0, 0, synthBuffer, 0, 0, getNumSamples(0));
-	buffer.copyFrom(1, 0, synthBuffer, 0, 0, getNumSamples(0));
+	int nSamples = getNumSamples(0);
+
+	buffer.copyFrom(0, 0, synthBuffer, 0, 0, nSamples);
+	buffer.copyFrom(1, 0, synthBuffer, 0, 0, nSamples);
+
+	// copy leftover samples to the beginning of the buffer
+	overflowBuffer.copyFrom(0, 0, synthBuffer, 0, nSamples, synthBuffer.getNumSamples()-nSamples);
+	synthBuffer.clear();
 }
 

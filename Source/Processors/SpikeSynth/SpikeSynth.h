@@ -83,6 +83,7 @@ public:
     /** Extra samples are placed in this buffer to allow seamless
         transitions between callbacks. */
     AudioSampleBuffer synthBuffer;
+    AudioSampleBuffer overflowBuffer;
     AudioSampleBuffer waveformBuffer;
 
     void saveCustomParametersToXml(XmlElement* parentElement);
@@ -98,9 +99,11 @@ private:
 
 	int startFreq;
 	int modeID;
-	int noteLength;
+	float noteLength;
 	float threshold;
 	float attack, decay, sustain, release;
+
+	int overflowBufferIndex;
 
 	bool checkThreshold(SpikeObject& s);
 

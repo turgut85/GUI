@@ -57,6 +57,7 @@ public:
     void labelTextChanged(Label* label);
     void comboBoxChanged(ComboBox* comboBox);
 
+    void setParams(int startNote, int mode, float thresh, float a, float d, float s, float r);
 
     ScopedPointer<Label> startNoteLabel;
     ScopedPointer<Label> modeLabel;
@@ -80,6 +81,8 @@ class ADSRInterface : public Component
 public:
 	ADSRInterface(SpikeSynth*);
 	virtual ~ADSRInterface();
+
+	void setParams(float a, float d, float s, float r);
 
 	void paint(Graphics& g);
 private:

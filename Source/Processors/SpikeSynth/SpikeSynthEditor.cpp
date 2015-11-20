@@ -84,6 +84,7 @@ SpikeSynthEditor::SpikeSynthEditor(GenericProcessor* parentNode, bool useDefault
     thresholdSlider->setActive(true);
     Array<double> v;
     thresholdSlider->setValues(v);
+    thresholdSlider->setValue(40.0f);
 
     thresholdLabel = new Label("Threshold:","Threshold:");
     thresholdLabel->setBounds(94, 35, 90, 15);
@@ -132,6 +133,18 @@ void SpikeSynthEditor::sliderEvent(Slider* slider)
 	getProcessor()->setParameter(0, slider->getValue());
 }
 
+void SpikeSynthEditor::setParams(int startNote, int mode, float thresh, float a, float d, float s, float r)
+//(int startNote, int mode, float thresh, float a, float, d, float s, float r)
+{
+
+	std::cout << "Setting startNote to " << startNote << std::endl;
+
+	startNoteComboBox->setSelectedId(startNote, dontSendNotification);
+	modeComboBox->setSelectedId(mode, dontSendNotification);
+	thresholdSlider->setValue(thresh);
+
+	adsrInterface->setParams(a,d,s,r);
+}
 
 // ----------------------------------
 
@@ -141,6 +154,11 @@ ADSRInterface::ADSRInterface(SpikeSynth* p)
 }
 
 ADSRInterface::~ADSRInterface()
+{
+
+}
+
+void ADSRInterface::setParams(float a, float d, float s, float r)
 {
 
 }
