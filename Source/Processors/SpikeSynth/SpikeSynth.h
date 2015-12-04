@@ -28,6 +28,7 @@
 
 #include "../GenericProcessor/GenericProcessor.h"
 #include "SpikeSynthEditor.h"
+#include "../Dsp/Dsp.h"
 
 #include "../Visualization/SpikeObject.h"
 
@@ -104,6 +105,8 @@ private:
 	float attack, decay, sustain, release;
 
 	int overflowBufferIndex;
+
+	Dsp::SimpleFilter <Dsp::ChebyshevI::BandPass <4>, 1> filter;
 
 	bool checkThreshold(SpikeObject& s);
 

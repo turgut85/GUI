@@ -133,17 +133,17 @@ void SpikeSynthEditor::sliderEvent(Slider* slider)
 	getProcessor()->setParameter(0, slider->getValue());
 }
 
-void SpikeSynthEditor::setParams(int startNote, int mode, float thresh, float a, float d, float s, float r)
+void SpikeSynthEditor::setParams(int startNote, int mode, float thresh, float a, float d, float s, float r, float noteLength)
 //(int startNote, int mode, float thresh, float a, float, d, float s, float r)
 {
 
-	std::cout << "Setting startNote to " << startNote << std::endl;
+	//std::cout << "Setting startNote to " << startNote << std::endl;
 
 	startNoteComboBox->setSelectedId(startNote, dontSendNotification);
 	modeComboBox->setSelectedId(mode, dontSendNotification);
 	thresholdSlider->setValue(thresh);
 
-	adsrInterface->setParams(a,d,s,r);
+	adsrInterface->setParams(a,d,s,r, noteLength);
 }
 
 // ----------------------------------
@@ -158,7 +158,7 @@ ADSRInterface::~ADSRInterface()
 
 }
 
-void ADSRInterface::setParams(float a, float d, float s, float r)
+void ADSRInterface::setParams(float a, float d, float s, float r, float noteLength)
 {
 
 }
