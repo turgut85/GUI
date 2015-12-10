@@ -50,6 +50,7 @@ public:
     virtual ~NeuropixEditor();
 
     void comboBoxChanged(ComboBox* comboBox);
+    void buttonEvent(Button* button);
 
     void saveEditorParameters(XmlElement*);
     void loadEditorParameters(XmlElement*);
@@ -59,9 +60,13 @@ public:
 private:
 
     ScopedPointer<ComboBox> optionComboBox;
+    ScopedPointer<UtilityButton> triggerTypeButton;
+    ScopedPointer<Label> triggerTypeLabel;
     Viewport* viewport;
     NeuropixCanvas* canvas;
     NeuropixThread* thread;
+
+    bool internalTrigger;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NeuropixEditor);
 

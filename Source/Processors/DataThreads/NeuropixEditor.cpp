@@ -41,6 +41,22 @@ NeuropixEditor::NeuropixEditor(GenericProcessor* parentNode, NeuropixThread* t, 
 	optionComboBox->setSelectedId(1, dontSendNotification);
 	addAndMakeVisible(optionComboBox);
 
+	triggerTypeButton = new UtilityButton("INTERNAL", Font("Small Text", 13, Font::plain));
+    triggerTypeButton->setRadius(3.0f);
+    triggerTypeButton->setBounds(20,90,85,22);
+    triggerTypeButton->addListener(this);
+    triggerTypeButton->setTooltip("Switch between external and internal triggering");
+    triggerTypeButton->setToggleState(true, dontSendNotification);
+    addAndMakeVisible(triggerTypeButton);
+
+    internalTrigger = true;
+
+    triggerTypeLabel = new Label("Trigger", "Trigger");
+    triggerTypeLabel->setFont(Font("Small Text", 13, Font::plain));
+    triggerTypeLabel->setBounds(105,91,100,20);
+    triggerTypeLabel->setColour(Label::textColourId, Colours::darkgrey);
+    addAndMakeVisible(triggerTypeLabel);
+
 	thread = t;
 }
 
@@ -58,6 +74,25 @@ void NeuropixEditor::comboBoxChanged(ComboBox* comboBox)
 		canvas->setOption(selectedOption);
 	}
 }
+
+void NeuropixEditor::buttonEvent(Button* button)
+{
+	if (button == triggerTypeButton)
+	{
+		internalTrigger = !internalTrigger;
+
+		if (internalTrigger)
+		{
+			triggerTypeButton->setLabel("INTERNAL");
+			triggerTypeButton->setToggleState(true, dontSendNotification);
+		} else {
+			triggerTypeButton->setLabel("EXTERNAL");
+			triggerTypeButton->setToggleState(false, dontSendNotification);
+		}
+		
+	}
+}
+
 
 void NeuropixEditor::saveEditorParameters(XmlElement* xml)
 {
