@@ -106,6 +106,8 @@ bool NeuropixThread::foundInputSource()
 /** Initializes data transfer.*/
 bool NeuropixThread::startAcquisition()
 {
+	//if (internalTrigger)
+	// ConfigAccessErrorCode caec neuropix_setNeuralStart();
 	return true;
 }
 
@@ -174,6 +176,11 @@ void NeuropixThread::setGain(int chNum, int apGain, int lfpGain)
 void NeuropixThread::setFilter(int filter)
 {
 	// BaseConfigErrorCode bcec = neuropix_setFilter(filter);
+}
+
+void NeuropixThread::setTriggerMode(bool trigger)
+{
+	// ConfigAccessErrorCode caec = neuropix_triggermode(trigger);
 }
 
 

@@ -89,6 +89,8 @@ void NeuropixEditor::buttonEvent(Button* button)
 			triggerTypeButton->setLabel("EXTERNAL");
 			triggerTypeButton->setToggleState(false, dontSendNotification);
 		}
+
+		thread->setTriggerMode(internalTrigger);
 		
 	}
 }

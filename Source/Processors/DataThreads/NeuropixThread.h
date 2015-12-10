@@ -90,11 +90,14 @@ public:
 	/** Sets the gain for each channel. */
 	void setFilter(int filter);
 
+    /** Togglese between internal and external triggering. */
+    void setTriggerMode(bool trigger);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NeuropixThread);
 
 private:
     bool baseStationAvailable;
+    bool internalTrigger;
 
 };
 
