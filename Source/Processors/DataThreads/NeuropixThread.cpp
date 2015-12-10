@@ -22,12 +22,28 @@
 */
 
 #include "NeuropixThread.h"
+// #include Neuropix_basestation_api
 
-NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn)
+NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvailable(false)
 {
-	// int neuropix_search(void) // returns the # of connected neuropix devices
 
-	// int neuropix_open(int index) // opens one of the connected neuropix devices
+	// OpenErrorCode errorCode = neuropix_open(); // establishes a data connection with the basestation
+
+	// if (errorCode == OPEN_SUCCESS)
+	// {
+	// 	errorCode = neuropix_initialize(); // initializes the headstage with default values
+
+	// 	baseStationAvailable = true;
+
+	// 	// // GET SYSTEM INFO:
+	// 	// ErrorCode neuropix_getHardwareVersion( version_number_version); ??
+	// 	// ConfigAccessErrorCode caec = neuropix_getBSversion( unsigned char& version major);
+	// 	// ConfigAccessErrorCode caec = neuropix_getBSrevision( unsigned char& version minor);
+	// 	// struct Version_number = neuropix_getAPIVersion();
+	// 	// EepromErrorCode eeec = neuropix_readid(AsicID& id);
+	// } else {
+	// 	baseStationAvailable = false;
+	// }
 
 	// void neuropix_readId(unsigned char* id) // reads 32-bit ID
 	// update the editor 
@@ -77,14 +93,14 @@ NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn)
 
 NeuropixThread::~NeuropixThread()
 {
-	// int neuropix_close(void) // closes all neuropix devices
+	//neuropix_close(); // closes the data and configuration link 
 }
 
 
 /** Returns true if the data source is connected, false otherwise.*/
 bool NeuropixThread::foundInputSource()
 {
-	return true;
+	return baseStationAvailable;
 }
 
 /** Initializes data transfer.*/
@@ -137,31 +153,77 @@ int NeuropixThread::getNumEventChannels()
 
 void NeuropixThread::selectElectrode(int chNum, int connection)
 {
-	// neuropix_selectElectrodes(chNum, connection);
+	// ShankConfigErrorCode scec = neuropix_selectElectrode(chNum, connection);
+
+	// if (scec == SHANK_SUCCESS)
+	// {
+	// 	// all good!
+	// }
 }
 
 void NeuropixThread::setReference(int chNum, int refSetting)
 {
-	// neuropix_setReference(chNum, refSetting);
+	// BaseConfigErrorCode bcec = neuropix_setReference(chNum, refSetting);
 }
 
 void NeuropixThread::setGain(int chNum, int apGain, int lfpGain)
 {
-	// neuropix_setGain(ch, apGain, lfpGain, 0);
+	// BaseConfigErrorCode bcec = neuropix_setGain(ch, apGain, lfpGain, 0);
 }
 
 void NeuropixThread::setFilter(int filter)
 {
-	// neuropix_setFilter(filter);
+	// BaseConfigErrorCode bcec = neuropix_setFilter(filter);
 }
 
 
 bool NeuropixThread::updateBuffer()
 {
 
-	// void neuropix_readAll(unsigned char* buffer, int* bytesRead) // reads all data into the incoming buffer
+	// ElectrodePacket packet;
 
-	// void neuropix_read(unsigned char* buffer, int length, int* bytesRead) // reads a specified # of bytes
+	// ReadErrorCode rec = neuropix_readelectrodedata(packet);
 
-	return true;
+	// // packet size = 152 x 32-bit = 4864 bits
+	// // 32 LFP channels???
+	// // 384 AP channels
+
+	// float lfpData[32];
+	// float spikeData[384];
+	
+	// int ctr[12];
+	
+	// int ch = 0;
+	// int ctrIndex = 0;
+
+	// int startBit = 32;
+
+	// while (startBit < 24*32)
+	// {
+	// 	ctr[ctrIndex] = packet[startBit+22:startBit+32]; // lsb
+	// 	ctr[ctrIndex] += packet[startBit+12:startBit+22] << 8; // msb
+
+	// 	ctrIndex++;
+
+	// 	if (startBit == 32)
+	// 		startBit = 12*32;
+	// 	else
+	// 		startBit += 32;
+	// }
+
+	// // convert counter to timestamp?
+
+	// while (startBit < 152*32)
+	// {
+	// 	spikeData[ch] = packet[startBit+2:startBit+12];
+	// 	spikeData[ch+1] = packet[startBit+12:startBit+22];
+	// 	spikeData[ch+2] = pcket[startBit+22:startBit+32];
+
+	// 	ch += 3;
+	// 	startBit += 32;
+	// }
+
+	// dataBuffer->addToBuffer(spikeData, &timestamp, &eventCode, 1);
+
+	// return true;
 }
