@@ -264,6 +264,8 @@ void VisualizerEditor::buttonEvent(Button* button)
 void VisualizerEditor::saveCustomParameters(XmlElement* xml)
 {
 
+    std::cout << "Saving visualizer params." << std::endl;
+
     xml->setAttribute("Type", "Visualizer");
 
     XmlElement* tabButtonState = xml->createNewChildElement("TAB");
@@ -282,7 +284,10 @@ void VisualizerEditor::saveCustomParameters(XmlElement* xml)
 
     if (canvas != nullptr)
     {
+        std::cout << "GOOOD" << std::endl;
         canvas->saveVisualizerParameters(xml);
+    } else {
+        std::cout << "BAAD" << std::endl;
     }
 
 }

@@ -100,7 +100,8 @@ NeuropixThread::~NeuropixThread()
 /** Returns true if the data source is connected, false otherwise.*/
 bool NeuropixThread::foundInputSource()
 {
-	return baseStationAvailable;
+	return true;
+	//return baseStationAvailable;
 }
 
 /** Initializes data transfer.*/

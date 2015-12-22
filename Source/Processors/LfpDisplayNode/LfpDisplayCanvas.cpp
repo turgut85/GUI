@@ -925,6 +925,8 @@ bool LfpDisplayCanvas::keyPressed(const KeyPress& key, Component* orig)
 void LfpDisplayCanvas::saveVisualizerParameters(XmlElement* xml)
 {
 
+    std::cout << "Saving LFP display." << std::endl;
+
     XmlElement* xmlNode = xml->createNewChildElement("LFPDISPLAY");
 
 

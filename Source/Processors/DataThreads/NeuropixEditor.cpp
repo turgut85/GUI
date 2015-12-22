@@ -75,7 +75,7 @@ void NeuropixEditor::comboBoxChanged(ComboBox* comboBox)
 	}
 }
 
-void NeuropixEditor::buttonEvent(Button* button)
+void NeuropixEditor::buttonCallback(Button* button)
 {
 	if (button == triggerTypeButton)
 	{
@@ -188,6 +188,15 @@ void NeuropixCanvas::buttonClicked(Button* button)
 
 }
 
+void NeuropixCanvas::saveVisualizerParameters(XmlElement* xml)
+{
+	neuropixInterface->saveParameters(xml);
+}
+
+void NeuropixCanvas::loadVisualizerParameters(XmlElement* xml)
+{
+	neuropixInterface->loadParameters(xml);
+}
 
 /*****************************************************/
 NeuropixInterface::NeuropixInterface(NeuropixThread* t): thread(t)
@@ -209,8 +218,6 @@ NeuropixInterface::NeuropixInterface(NeuropixThread* t): thread(t)
 		channelSelectionState.add(0);
 		channelOutput.add(1);
 	}
-
-
 
 	visualizationMode = 0;
 
@@ -1102,8 +1109,6 @@ void NeuropixInterface::mouseWheelMove(const MouseEvent&  event, const MouseWhee
 		repaint();
 	}
 
-    
-
 }
 
 MouseCursor NeuropixInterface::getMouseCursor()
@@ -1518,6 +1523,96 @@ int NeuropixInterface::getConnectionForChannel(int ch)
 		else
 			return 3;
 	}
+}
+
+void NeuropixInterface::saveParameters(XmlElement* xml)
+{
+
+	std::cout << "Saving Neuropix display." << std::endl;
+
+    XmlElement* xmlNode = xml->createNewChildElement("NEUROPIXELS");
+
+    xmlNode->setAttribute("ZoomHeight", zoomHeight);
+    xmlNode->setAttribute("ZoomOffset", zoomOffset);
+
+    String channelStatusValue = "";
+    String channelReferenceValue = "";
+    String channelLfpGainValue = "";
+    String channelApGainValue = "";
+    String channelSelectionStateValue = "";
+    String channelOutputValue = "";
+
+    for (int i = 0; i < 966; i++)
+    {
+    	channelStatusValue += String::toHexString(channelStatus[i] + 3);
+    	channelReferenceValue += String::toHexString(channelReference[i]);
+    	channelLfpGainValue += String::toHexString(channelLfpGain[i]);
+    	channelApGainValue += String::toHexString(channelApGain[i]);
+    	channelSelectionStateValue += String::toHexString(channelSelectionState[i]);
+    	channelOutputValue += String::toHexString(channelOutput[i]);
+
+    }
+
+    xmlNode->setAttribute("channelStatus", channelStatusValue);
+    xmlNode->setAttribute("channelReference", channelReferenceValue);
+    xmlNode->setAttribute("channelLfpGain", channelLfpGainValue);
+    xmlNode->setAttribute("channelApGain", channelApGainValue);
+    xmlNode->setAttribute("channelSelectionState", channelSelectionStateValue);
+    xmlNode->setAttribute("channelOutput", channelOutputValue);
+
+    xmlNode->setAttribute("visualizationMode", visualizationMode);
+
+    // filter cut
+    // annotations
+}
+
+void NeuropixInterface::loadParameters(XmlElement* xml)
+{
+
+    String channelStatusValue;
+    String channelReferenceValue;
+    String channelLfpGainValue;
+    String channelApGainValue;
+    String channelSelectionStateValue;
+    String channelOutputValue;
+
+	forEachXmlChildElement(*xml, xmlNode)
+    {
+        if (xmlNode->hasTagName("NEUROPIXELS"))
+        {
+            zoomHeight = xmlNode->getIntAttribute("ZoomHeight");
+			zoomOffset = xmlNode->getIntAttribute("ZoomOffset");
+
+			channelStatusValue = xmlNode->getStringAttribute("channelStatus");
+			channelReferenceValue = xmlNode->getStringAttribute("channelReference");
+			channelLfpGainValue = xmlNode->getStringAttribute("channeLfpGain");
+			channelApGainValue = xmlNode->getStringAttribute("channelApGain");
+			channelSelectionStateValue = xmlNode->getStringAttribute("channelSelectionState");
+			channelOutputValue = xmlNode->getStringAttribute("channelOutput");
+
+			visualizationMode = xmlNode->getIntAttribute("visualizationMode");
+
+        }
+    }
+
+    if (1)
+    {
+	    for (int i = 0; i < 966; i++)
+	    {
+	    	channelStatus.set(i,channelStatusValue.substring(i,i+1).getHexValue32() - 3);
+	    	channelReference.set(i,channelReferenceValue.substring(i,i+1).getHexValue32());
+	    	channelLfpGain.set(i,channelLfpGainValue.substring(i,i+1).getHexValue32());
+	    	channelApGain.set(i,channelApGainValue.substring(i,i+1).getHexValue32());
+	    	channelSelectionState.set(i,channelSelectionStateValue.substring(i,i+1).getHexValue32());
+	    	channelOutput.set(i,channelOutputValue.substring(i,i+1).getHexValue32());
+
+	    }
+	}
+
+
+
+    repaint();
+
 }
 
 // --------------------------------------

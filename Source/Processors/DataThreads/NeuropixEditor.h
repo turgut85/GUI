@@ -50,7 +50,7 @@ public:
     virtual ~NeuropixEditor();
 
     void comboBoxChanged(ComboBox* comboBox);
-    void buttonEvent(Button* button);
+    void buttonCallback(Button* button);
 
     void saveEditorParameters(XmlElement*);
     void loadEditorParameters(XmlElement*);
@@ -94,7 +94,11 @@ public:
     void setParameter(int, int, int, float);
     void buttonClicked(Button* button);
 
+    void saveVisualizerParameters(XmlElement* xml);
+	void loadVisualizerParameters(XmlElement* xml);
+
 	void resized();
+
 
 	SourceNode* processor;
 	ScopedPointer<Viewport> neuropixViewport;
@@ -122,6 +126,10 @@ public:
     void buttonClicked(Button*);
     void comboBoxChanged(ComboBox*);
     void labelTextChanged(Label* l);
+
+
+	void saveParameters(XmlElement* xml);
+	void loadParameters(XmlElement* xml);
 
     void setAnnotationLabel(String, Colour);
 
