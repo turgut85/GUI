@@ -1563,7 +1563,19 @@ void NeuropixInterface::saveParameters(XmlElement* xml)
     xmlNode->setAttribute("visualizationMode", visualizationMode);
 
     // filter cut
+    xmlNode->setAttribute("filterCut", filterComboBox->getSelectedId());
+
     // annotations
+    for (int i = 0; i < annotations.size(); i++)
+	{
+	 	Annotation& a = annotations.getReference(i);
+	 	XmlElement* annotationNode = xmlNode->createNewChildElement("ANNOTATION");
+	 	annotationNode->setAttribute("text", a.text);
+	 	annotationNode->setAttribute("channel", a.channels[0]);
+	 	annotationNode->setAttribute("R", a.colour.getRed());
+	 	annotationNode->setAttribute("G", a.colour.getGreen());
+	 	annotationNode->setAttribute("B", a.colour.getBlue());
+	}
 }
 
 void NeuropixInterface::loadParameters(XmlElement* xml)
@@ -1592,6 +1604,22 @@ void NeuropixInterface::loadParameters(XmlElement* xml)
 
 			visualizationMode = xmlNode->getIntAttribute("visualizationMode");
 
+			filterComboBox->setSelectedId(xmlNode->getIntAttribute("filterCut", 1), sendNotification);
+
+			forEachXmlChildElement(*xmlNode, annotationNode)
+	        {
+	            if (annotationNode->hasTagName("ANNOTATION"))
+	            {
+	            	Array<int> annotationChannels;
+	            	annotationChannels.add(annotationNode->getIntAttribute("channel"));
+	            	annotations.add(Annotation(annotationNode->getStringAttribute("text"),
+	            		            annotationChannels,
+	            		            Colour( annotationNode->getIntAttribute("R"),
+	            		            	    annotationNode->getIntAttribute("G"),
+	            		            	    annotationNode->getIntAttribute("B"))));
+	            }
+	        }
+
         }
     }
 
@@ -1608,8 +1636,6 @@ void NeuropixInterface::loadParameters(XmlElement* xml)
 
 	    }
 	}
-
-
 
     repaint();
 
