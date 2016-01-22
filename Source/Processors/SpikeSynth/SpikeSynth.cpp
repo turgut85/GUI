@@ -106,11 +106,12 @@ void SpikeSynth::updateSettings()
 bool SpikeSynth::enable()
 {
 	overflowBufferIndex = 0;
+	return true;
 }
 
 bool SpikeSynth::disable()
 {
-
+	return true;
 }
 
 void SpikeSynth::updateWaveforms()
