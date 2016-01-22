@@ -79,6 +79,7 @@ ProcessorList::ProcessorList()
     filters->addSubItem(new ProcessorListItem("Channel Map"));
     filters->addSubItem(new ProcessorListItem("Common Avg Ref"));
     filters->addSubItem(new ProcessorListItem("Rectifier"));
+    filters->addSubItem(new ProcessorListItem("Spike Synth"));
     //filters->addSubItem(new ProcessorListItem("Eye Tracking"));
 
 
@@ -92,6 +93,9 @@ ProcessorList::ProcessorList()
     sinks->addSubItem(new ProcessorListItem("Arduino Output"));
     // sinks->addSubItem(new ProcessorListItem("FPGA Output"));
     sinks->addSubItem(new ProcessorListItem("Pulse Pal"));
+#ifdef ZEROMQ
+    sinks->addSubItem(new ProcessorListItem("Event Broadcaster"));
+#endif
 
     ProcessorListItem* utilities = new ProcessorListItem("Utilities");
     utilities->addSubItem(new ProcessorListItem("Splitter"));

@@ -30,6 +30,7 @@
 #include "../LfpDisplayNode/LfpDisplayNode.h"
 #include "../SpikeDisplayNode/SpikeDisplayNode.h"
 #include "../EventNode/EventNode.h"
+#include "../EventBroadcaster/EventBroadcaster.h"
 #include "../FilterNode/FilterNode.h"
 #include "../RecordNode/RecordNode.h"
 #include "../ResamplingNode/ResamplingNode.h"
@@ -39,6 +40,7 @@
 #include "../EventDetector/EventDetector.h"
 #include "../SpikeDetector/SpikeDetector.h"
 #include "../SpikeSorter/SpikeSorter.h"
+#include "../SpikeSynth/SpikeSynth.h" 
 #include "../PhaseDetector/PhaseDetector.h"
 #include "../FileReader/FileReader.h"
 #include "../ArduinoOutput/ArduinoOutput.h"
@@ -608,6 +610,11 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
             std::cout << "Creating a new common average reference node." << std::endl;
             processor = new CAR();
         }
+        else if (subProcessorType.equalsIgnoreCase("Spike Synth"))
+        {
+            std::cout << "Creating a new common spike synthesizer." << std::endl;
+            processor = new SpikeSynth();
+        }
 		CoreServices::sendStatusMessage("New filter node created.");
 
     }
@@ -673,6 +680,11 @@ GenericProcessor* ProcessorGraph::createProcessorFromDescription(String& descrip
 			std::cout << "Creating a PSTH output node." << std::endl;
 			processor = new PeriStimulusTimeHistogramNode();
 		}
+        else if (subProcessorType.equalsIgnoreCase("Event Broadcaster"))
+        {
+            std::cout << "Creating an Event Broadcaster output node." << std::endl;
+            processor = new EventBroadcaster();
+        }
 
 		CoreServices::sendStatusMessage("New sink created.");
     }
