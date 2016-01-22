@@ -22,6 +22,8 @@
 */
 
 #include "NeuropixThread.h"
+
+#include "half.hpp"
 // #include Neuropix_basestation_api
 
 NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvailable(false)
@@ -107,21 +109,28 @@ bool NeuropixThread::foundInputSource()
 /** Initializes data transfer.*/
 bool NeuropixThread::startAcquisition()
 {
+	// // clear the buffer
+    // neuropix_nrst(false);
+    // neuropix_resetDatapath();
+    // neuropix_nrst(true);
+
 	//if (internalTrigger)
 	// ConfigAccessErrorCode caec neuropix_setNeuralStart();
+
 	return true;
 }
 
 /** Stops data transfer.*/
 bool NeuropixThread::stopAcquisition()
 {
+	// neuropix_nrst(false);
 	return true;
 }
 
 /** Returns the number of continuous headstage channels the data source can provide.*/
 int NeuropixThread::getNumHeadstageOutputs()
 {
-	return 16;
+	return 384;
 }
 
 /** Returns the number of continuous aux channels the data source can provide.*/
@@ -139,7 +148,7 @@ int NeuropixThread::getNumAdcOutputs()
 /** Returns the sample rate of the data source.*/
 float NeuropixThread::getSampleRate()
 {
-	return 25000.;
+	return 30000.;
 }
 
 /** Returns the volts per bit of the data source.*/
@@ -192,46 +201,22 @@ bool NeuropixThread::updateBuffer()
 
 	// ReadErrorCode rec = neuropix_readelectrodedata(packet);
 
-	// // packet size = 152 x 32-bit = 4864 bits
-	// // 32 LFP channels???
-	// // 384 AP channels
+	// int64 timetamp = 0;
+	// uint64 eventCode = 0;
+	// float[384] data;
 
-	// float lfpData[32];
-	// float spikeData[384];
-	
-	// int ctr[12];
-	
-	// int ch = 0;
-	// int ctrIndex = 0;
+	// for (int i = 0; i < 12; i++)
+	// { 
+	// 	eventCode = (uint64) packet.synchronization[i];
+	// 	timetamp = (int64) packet.ctrs[i][0];
 
-	// int startBit = 32;
+	// 	for (int ch = 0; ch < 384; ch++)
+	// 	{
+	// 		data[ch] = (float) packet.ap_data[i,ch];
+	// 	}
 
-	// while (startBit < 24*32)
-	// {
-	// 	ctr[ctrIndex] = packet[startBit+22:startBit+32]; // lsb
-	// 	ctr[ctrIndex] += packet[startBit+12:startBit+22] << 8; // msb
-
-	// 	ctrIndex++;
-
-	// 	if (startBit == 32)
-	// 		startBit = 12*32;
-	// 	else
-	// 		startBit += 32;
-	// }
-
-	// // convert counter to timestamp?
-
-	// while (startBit < 152*32)
-	// {
-	// 	spikeData[ch] = packet[startBit+2:startBit+12];
-	// 	spikeData[ch+1] = packet[startBit+12:startBit+22];
-	// 	spikeData[ch+2] = pcket[startBit+22:startBit+32];
-
-	// 	ch += 3;
-	// 	startBit += 32;
-	// }
-
-	// dataBuffer->addToBuffer(spikeData, &timestamp, &eventCode, 1);
-
-	// return true;
+	// 	dataBuffer->addToBuffer(data, &timestamp, &eventCode, 1);
+ //    }
+	 
+	return true;
 }
