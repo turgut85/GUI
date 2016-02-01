@@ -5,7 +5,6 @@
 #ifndef Neuropix_basestation_api_h_
 #define Neuropix_basestation_api_h_
 
-
 class NeuropixConnectionLinkIntf;
 class VciInterface;
 class neuroprobe;

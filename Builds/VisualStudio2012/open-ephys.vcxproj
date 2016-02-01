@@ -1531,6 +1531,15 @@
     <ClInclude Include="..\..\Source\Processors\Channel\Channel.h"/>
     <ClInclude Include="..\..\Source\Processors\ChannelMappingNode\ChannelMappingEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\ChannelMappingNode\ChannelMappingNode.h"/>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\AdcPacket.h"/>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\BaseConfiguration.h"/>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\ConnectionLinkPacket.h"/>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\ElectrodePacket.h"/>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\half.hpp"/>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\hs_fpga_register_def.h"/>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\Neuropix_basestation_api.h"/>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\ShankConfiguration.h"/>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\TestConfiguration.h"/>
     <ClInclude Include="..\..\Source\Processors\DataThreads\NeuropixEditor.h"/>
     <ClInclude Include="..\..\Source\Processors\DataThreads\NeuropixThread.h"/>
     <ClInclude Include="..\..\Source\Processors\DataThreads\EcubeEditor.h"/>

@@ -1,0 +1,120 @@
+﻿Build started 1/27/2016 12:33:02 PM.
+     1>Project "C:\Users\joshs\Documents\GitHub\GUI\Introjucer\Builds\VisualStudio2013\The Introjucer.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I..\..\JuceLibraryCode /I..\..\..\JuceLibraryCode\modules /Zi /nologo /W4 /WX- /MP /O1 /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D JUCER_VS2013_78A5020=1 /D JUCE_APP_VERSION=3.1.0 /D JUCE_APP_VERSION_HEX=0x30100 /Gm- /EHsc /MT /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"Release\\" /Fd"Release\\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\Source\Application\jucer_AppearanceSettings.cpp ..\..\Source\Application\jucer_CommandLine.cpp ..\..\Source\Application\jucer_DocumentEditorComponent.cpp ..\..\Source\Application\jucer_Main.cpp ..\..\Source\Application\jucer_MainWindow.cpp ..\..\Source\Application\jucer_OpenDocumentManager.cpp ..\..\Source\Project\jucer_Module.cpp ..\..\Source\Project\jucer_NewFileWizard.cpp ..\..\Source\Project\jucer_NewProjectWizard.cpp ..\..\Source\Project\jucer_Project.cpp ..\..\Source\Project\jucer_ProjectContentComponent.cpp ..\..\Source\Project\jucer_ProjectType.cpp "..\..\Source\Project Saving\jucer_ProjectExporter.cpp" "..\..\Source\Project Saving\jucer_ResourceFile.cpp" ..\..\Source\Utility\jucer_CodeHelpers.cpp ..\..\Source\Utility\jucer_FileHelpers.cpp ..\..\Source\Utility\jucer_Icons.cpp ..\..\Source\Utility\jucer_JucerTreeViewBase.cpp ..\..\Source\Utility\jucer_MiscUtilities.cpp ..\..\Source\Utility\jucer_StoredSettings.cpp "..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp" ..\..\Source\ComponentEditor\components\jucer_ComponentTypeHandler.cpp ..\..\Source\ComponentEditor\documents\jucer_ButtonDocument.cpp ..\..\Source\ComponentEditor\documents\jucer_ComponentDocument.cpp ..\..\Source\ComponentEditor\paintelements\jucer_ColouredElement.cpp ..\..\Source\ComponentEditor\paintelements\jucer_PaintElement.cpp ..\..\Source\ComponentEditor\paintelements\jucer_PaintElementPath.cpp ..\..\Source\ComponentEditor\ui\jucer_ComponentLayoutEditor.cpp ..\..\Source\ComponentEditor\ui\jucer_ComponentOverlayComponent.cpp ..\..\Source\ComponentEditor\ui\jucer_EditingPanelBase.cpp ..\..\Source\ComponentEditor\ui\jucer_JucerDocumentEditor.cpp ..\..\Source\ComponentEditor\ui\jucer_PaintRoutineEditor.cpp ..\..\Source\ComponentEditor\ui\jucer_PaintRoutinePanel.cpp ..\..\Source\ComponentEditor\ui\jucer_ResourceEditorPanel.cpp ..\..\Source\ComponentEditor\ui\jucer_TestComponent.cpp ..\..\Source\ComponentEditor\jucer_BinaryResources.cpp ..\..\Source\ComponentEditor\jucer_ComponentLayout.cpp ..\..\Source\ComponentEditor\jucer_GeneratedCode.cpp ..\..\Source\ComponentEditor\jucer_JucerDocument.cpp ..\..\Source\ComponentEditor\jucer_ObjectTypes.cpp ..\..\Source\ComponentEditor\jucer_PaintRoutine.cpp ..\..\JuceLibraryCode\BinaryData.cpp ..\..\..\JuceLibraryCode\modules\juce_core\juce_core.cpp ..\..\..\JuceLibraryCode\modules\juce_cryptography\juce_cryptography.cpp ..\..\..\JuceLibraryCode\modules\juce_data_structures\juce_data_structures.cpp ..\..\..\JuceLibraryCode\modules\juce_events\juce_events.cpp ..\..\..\JuceLibraryCode\modules\juce_graphics\juce_graphics.cpp ..\..\..\JuceLibraryCode\modules\juce_gui_basics\juce_gui_basics.cpp ..\..\..\JuceLibraryCode\modules\juce_gui_extra\juce_gui_extra.cpp
+         jucer_AppearanceSettings.cpp
+         jucer_CommandLine.cpp
+         jucer_DocumentEditorComponent.cpp
+         jucer_Main.cpp
+         jucer_MainWindow.cpp
+         jucer_OpenDocumentManager.cpp
+         jucer_Module.cpp
+         jucer_NewFileWizard.cpp
+         jucer_NewProjectWizard.cpp
+         jucer_Project.cpp
+         jucer_ProjectContentComponent.cpp
+         jucer_ProjectType.cpp
+         jucer_ProjectExporter.cpp
+         jucer_ResourceFile.cpp
+         jucer_CodeHelpers.cpp
+         jucer_FileHelpers.cpp
+         jucer_Icons.cpp
+         jucer_JucerTreeViewBase.cpp
+         jucer_MiscUtilities.cpp
+         jucer_StoredSettings.cpp
+         jucer_SourceCodeEditor.cpp
+         jucer_ComponentTypeHandler.cpp
+         jucer_ButtonDocument.cpp
+         jucer_ComponentDocument.cpp
+         jucer_ColouredElement.cpp
+         jucer_PaintElement.cpp
+         jucer_PaintElementPath.cpp
+         jucer_ComponentLayoutEditor.cpp
+         jucer_ComponentOverlayComponent.cpp
+         jucer_EditingPanelBase.cpp
+         jucer_JucerDocumentEditor.cpp
+         jucer_PaintRoutineEditor.cpp
+         jucer_PaintRoutinePanel.cpp
+         jucer_ResourceEditorPanel.cpp
+         jucer_TestComponent.cpp
+         jucer_BinaryResources.cpp
+         jucer_ComponentLayout.cpp
+         jucer_GeneratedCode.cpp
+         jucer_JucerDocument.cpp
+         jucer_ObjectTypes.cpp
+         jucer_PaintRoutine.cpp
+         BinaryData.cpp
+         juce_core.cpp
+         juce_cryptography.cpp
+         juce_data_structures.cpp
+         juce_events.cpp
+         juce_graphics.cpp
+         juce_gui_basics.cpp
+         juce_gui_extra.cpp
+     1>c:\users\joshs\documents\github\gui\jucelibrarycode\modules\juce_core\network/juce_Socket.cpp(412): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings (..\..\..\JuceLibraryCode\modules\juce_core\juce_core.cpp)
+                 C:\Program Files (x86)\Windows Kits\8.1\Include\um\winsock2.h(1850) : see declaration of 'inet_addr'
+     1>c:\users\joshs\documents\github\gui\jucelibrarycode\modules\juce_core\network/juce_Socket.cpp(449): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings (..\..\..\JuceLibraryCode\modules\juce_core\juce_core.cpp)
+                 C:\Program Files (x86)\Windows Kits\8.1\Include\um\winsock2.h(1868) : see declaration of 'inet_ntoa'
+     1>c:\users\joshs\documents\github\gui\jucelibrarycode\modules\juce_core\network/juce_Socket.cpp(553): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings (..\..\..\JuceLibraryCode\modules\juce_core\juce_core.cpp)
+                 C:\Program Files (x86)\Windows Kits\8.1\Include\um\winsock2.h(1868) : see declaration of 'inet_ntoa'
+       ResourceCompile:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\rc.exe /D NDEBUG /l"0x0409" /nologo /fo"Release\resources.res" .\resources.rc 
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:".\Release\\The Introjucer.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"Release\\The Introjucer.pdb" /SUBSYSTEM:WINDOWS /LARGEADDRESSAWARE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\Release\The Introjucer.lib" /MACHINE:X86 /SAFESEH Release\resources.res
+         Release\\jucer_AppearanceSettings.obj
+         Release\\jucer_CommandLine.obj
+         Release\\jucer_DocumentEditorComponent.obj
+         Release\\jucer_Main.obj
+         Release\\jucer_MainWindow.obj
+         Release\\jucer_OpenDocumentManager.obj
+         Release\\jucer_Module.obj
+         Release\\jucer_NewFileWizard.obj
+         Release\\jucer_NewProjectWizard.obj
+         Release\\jucer_Project.obj
+         Release\\jucer_ProjectContentComponent.obj
+         Release\\jucer_ProjectType.obj
+         Release\\jucer_ProjectExporter.obj
+         Release\\jucer_ResourceFile.obj
+         Release\\jucer_CodeHelpers.obj
+         Release\\jucer_FileHelpers.obj
+         Release\\jucer_Icons.obj
+         Release\\jucer_JucerTreeViewBase.obj
+         Release\\jucer_MiscUtilities.obj
+         Release\\jucer_StoredSettings.obj
+         Release\\jucer_SourceCodeEditor.obj
+         Release\\jucer_ComponentTypeHandler.obj
+         Release\\jucer_ButtonDocument.obj
+         Release\\jucer_ComponentDocument.obj
+         Release\\jucer_ColouredElement.obj
+         Release\\jucer_PaintElement.obj
+         Release\\jucer_PaintElementPath.obj
+         Release\\jucer_ComponentLayoutEditor.obj
+         Release\\jucer_ComponentOverlayComponent.obj
+         Release\\jucer_EditingPanelBase.obj
+         Release\\jucer_JucerDocumentEditor.obj
+         Release\\jucer_PaintRoutineEditor.obj
+         Release\\jucer_PaintRoutinePanel.obj
+         Release\\jucer_ResourceEditorPanel.obj
+         Release\\jucer_TestComponent.obj
+         Release\\jucer_BinaryResources.obj
+         Release\\jucer_ComponentLayout.obj
+         Release\\jucer_GeneratedCode.obj
+         Release\\jucer_JucerDocument.obj
+         Release\\jucer_ObjectTypes.obj
+         Release\\jucer_PaintRoutine.obj
+         Release\\BinaryData.obj
+         Release\\juce_core.obj
+         Release\\juce_cryptography.obj
+         Release\\juce_data_structures.obj
+         Release\\juce_events.obj
+         Release\\juce_graphics.obj
+         Release\\juce_gui_basics.obj
+         Release\\juce_gui_extra.obj
+         Generating code
+         Finished generating code
+         The Introjucer.vcxproj -> C:\Users\joshs\Documents\GitHub\GUI\Introjucer\Builds\VisualStudio2013\.\Release\The Introjucer.exe
+     1>Done Building Project "C:\Users\joshs\Documents\GitHub\GUI\Introjucer\Builds\VisualStudio2013\The Introjucer.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:43.55

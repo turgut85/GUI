@@ -111,31 +111,31 @@
         <MODULEPATH id="juce_audio_basics" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </VS2012>
-    <VS2013 targetFolder="Builds/VisualStudio2013" externalLibraries="setupapi.lib&#10;opengl32.lib&#10;glu32.lib&#10;hdf5.lib&#10;hdf5_cpp.lib&#10;libzmq-v120-mt-4_0_4.lib"
+    <VS2013 targetFolder="Builds/VisualStudio2013" externalLibraries="setupapi.lib&#10;opengl32.lib&#10;glu32.lib&#10;hdf5.lib&#10;hdf5_cpp.lib&#10;libzmq-v120-mt-4_0_4.lib&#10;libNeuropix_basestation_api.lib"
             extraDefs="NOMINMAX&#10;ZEROMQ">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="1" optimisation="1" targetName="open-ephys" binaryPath="Builds\VisualStudio2013\Debug\bin"
                        headerPath="../../Resources/windows-libs/HDF5/include&#10;../../Resources/windows-libs/ZeroMQ/include"
-                       libraryPath="../../Resources/windows-libs/HDF5/lib/x86&#10;../../Resources/windows-libs/ZeroMQ/lib_x86"
+                       libraryPath="../../Resources/windows-libs/HDF5/lib/x86&#10;../../Resources/windows-libs/ZeroMQ/lib_x86&#10;../../Resources/windows-libs/neuropix"
                        wholeProgramOptimisation="1" postbuildCommand="copy /Y &quot;..\..\Resources\DLLs\VS2013\*.dll&quot; &quot;$(OutDir)&quot;"
                        fastMath="1"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="0" optimisation="3" targetName="open-ephys" binaryPath="Builds\VisualStudio2013\Release\bin"
                        headerPath="../../Resources/windows-libs/HDF5/include&#10;../../Resources/windows-libs/ZeroMQ/include"
-                       libraryPath="../../Resources/windows-libs/HDF5/lib/x86&#10;../../Resources/windows-libs/ZeroMQ/lib_x86"
+                       libraryPath="../../Resources/windows-libs/HDF5/lib/x86&#10;../../Resources/windows-libs/ZeroMQ/lib_x86&#10;../../Resources/windows-libs/neuropix"
                        postbuildCommand="copy /Y &quot;..\..\Resources\DLLs\VS2013\*.dll&quot; &quot;$(OutDir)&quot;"
                        fastMath="1"/>
         <CONFIGURATION name="Debug64" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="open-ephys" binaryPath="Builds\VisualStudio2013\x64\Debug64\bin"
                        headerPath="../../Resources/windows-libs/HDF5/include&#10;../../Resources/windows-libs/ZeroMQ/include"
-                       libraryPath="../../Resources/windows-libs/HDF5/lib/x64&#10;../../Resources/windows-libs/ZeroMQ/lib_x64"
+                       libraryPath="../../Resources/windows-libs/HDF5/lib/x64&#10;../../Resources/windows-libs/ZeroMQ/lib_x64&#10;../../Resources/windows-libs/neuropix"
                        wholeProgramOptimisation="1" postbuildCommand="copy /Y &quot;..\..\Resources\DLLs\VS2013-x64\*.dll&quot; &quot;$(OutDir)&quot;"
                        fastMath="1"/>
         <CONFIGURATION name="Release64" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="0" optimisation="3" targetName="open-ephys" binaryPath="Builds\VisualStudio2013\x64\Release64\bin"
                        headerPath="../../Resources/windows-libs/HDF5/include&#10;../../Resources/windows-libs/ZeroMQ/include"
-                       libraryPath="../../Resources/windows-libs/HDF5/lib/x64&#10;../../Resources/windows-libs/ZeroMQ/lib_x64"
+                       libraryPath="../../Resources/windows-libs/HDF5/lib/x64&#10;../../Resources/windows-libs/ZeroMQ/lib_x64&#10;../../Resources/windows-libs/neuropix"
                        postbuildCommand="copy /Y &quot;..\..\Resources\DLLs\VS2013-x64\*.dll&quot; &quot;$(OutDir)&quot;"
                        fastMath="1"/>
       </CONFIGURATIONS>
@@ -341,6 +341,24 @@
                 file="Source/Processors/ChannelMappingNode/ChannelMappingNode.h"/>
         </GROUP>
         <GROUP id="ZgsuWxi" name="DataThreads">
+          <GROUP id="{8A909F3F-F57E-685A-D0C1-55EDF40D1E36}" name="neuropix-api">
+            <FILE id="eh8X3E" name="AdcPacket.h" compile="0" resource="0" file="Source/Processors/DataThreads/neuropix-api/AdcPacket.h"/>
+            <FILE id="kKafVC" name="BaseConfiguration.h" compile="0" resource="0"
+                  file="Source/Processors/DataThreads/neuropix-api/BaseConfiguration.h"/>
+            <FILE id="kLGFbZ" name="ConnectionLinkPacket.h" compile="0" resource="0"
+                  file="Source/Processors/DataThreads/neuropix-api/ConnectionLinkPacket.h"/>
+            <FILE id="k2PDkz" name="ElectrodePacket.h" compile="0" resource="0"
+                  file="Source/Processors/DataThreads/neuropix-api/ElectrodePacket.h"/>
+            <FILE id="S8beyX" name="half.hpp" compile="0" resource="0" file="Source/Processors/DataThreads/neuropix-api/half.hpp"/>
+            <FILE id="lNcBlx" name="hs_fpga_register_def.h" compile="0" resource="0"
+                  file="Source/Processors/DataThreads/neuropix-api/hs_fpga_register_def.h"/>
+            <FILE id="BFeOGE" name="Neuropix_basestation_api.h" compile="0" resource="0"
+                  file="Source/Processors/DataThreads/neuropix-api/Neuropix_basestation_api.h"/>
+            <FILE id="Fh7uR8" name="ShankConfiguration.h" compile="0" resource="0"
+                  file="Source/Processors/DataThreads/neuropix-api/ShankConfiguration.h"/>
+            <FILE id="ZVaujy" name="TestConfiguration.h" compile="0" resource="0"
+                  file="Source/Processors/DataThreads/neuropix-api/TestConfiguration.h"/>
+          </GROUP>
           <FILE id="sHJmld" name="NeuropixEditor.cpp" compile="1" resource="0"
                 file="Source/Processors/DataThreads/NeuropixEditor.cpp"/>
           <FILE id="j0zx4S" name="NeuropixEditor.h" compile="0" resource="0"

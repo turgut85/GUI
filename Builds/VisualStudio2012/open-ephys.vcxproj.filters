@@ -56,6 +56,9 @@
     <Filter Include="open-ephys\Source\Processors\DataThreads">
       <UniqueIdentifier>{AA123918-8642-2612-7B72-C63DA032271B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="open-ephys\Source\Processors\DataThreads\neuropix-api">
+      <UniqueIdentifier>{14866568-BF5A-11E7-90B7-6DB75C1FD081}</UniqueIdentifier>
+    </Filter>
     <Filter Include="open-ephys\Source\Processors\DataThreads\rhythm-api">
       <UniqueIdentifier>{EF1534B7-662E-9844-D11F-1D1003B02E4A}</UniqueIdentifier>
     </Filter>
@@ -2108,6 +2111,33 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\ChannelMappingNode\ChannelMappingNode.h">
       <Filter>open-ephys\Source\Processors\ChannelMappingNode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\AdcPacket.h">
+      <Filter>open-ephys\Source\Processors\DataThreads\neuropix-api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\BaseConfiguration.h">
+      <Filter>open-ephys\Source\Processors\DataThreads\neuropix-api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\ConnectionLinkPacket.h">
+      <Filter>open-ephys\Source\Processors\DataThreads\neuropix-api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\ElectrodePacket.h">
+      <Filter>open-ephys\Source\Processors\DataThreads\neuropix-api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\half.hpp">
+      <Filter>open-ephys\Source\Processors\DataThreads\neuropix-api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\hs_fpga_register_def.h">
+      <Filter>open-ephys\Source\Processors\DataThreads\neuropix-api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\Neuropix_basestation_api.h">
+      <Filter>open-ephys\Source\Processors\DataThreads\neuropix-api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\ShankConfiguration.h">
+      <Filter>open-ephys\Source\Processors\DataThreads\neuropix-api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Processors\DataThreads\neuropix-api\TestConfiguration.h">
+      <Filter>open-ephys\Source\Processors\DataThreads\neuropix-api</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Processors\DataThreads\NeuropixEditor.h">
       <Filter>open-ephys\Source\Processors\DataThreads</Filter>

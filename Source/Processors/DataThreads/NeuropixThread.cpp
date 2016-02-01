@@ -2,7 +2,7 @@
     ------------------------------------------------------------------
 
     This file is part of the Open Ephys GUI
-    Copyright (C) 2015 Allen Institute for Brain Science
+    Copyright (C) 2016 Allen Institute for Brain Science
 
     ------------------------------------------------------------------
 
@@ -23,16 +23,26 @@
 
 #include "NeuropixThread.h"
 
-#include "half.hpp"
-// #include Neuropix_basestation_api
+#include "neuropix-api/half.hpp"
+#include "neuropix-api/Neuropix_basestation_api.h"
+
+
 
 NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvailable(false)
 {
 
-	// OpenErrorCode errorCode = neuropix_open(); // establishes a data connection with the basestation
+	Neuropix_basestation_api neuropix;
 
-	// if (errorCode == OPEN_SUCCESS)
-	// {
+	OpenErrorCode errorCode = neuropix.neuropix_open(); // establishes a data connection with the basestation
+
+	if (errorCode == OPEN_SUCCESS)
+	{
+		CoreServices::sendStatusMessage("Success.");
+		neuropix.neuropix_close();
+	}
+	else {
+		CoreServices::sendStatusMessage("Failure with error code " + String(errorCode));
+	}
 	// 	errorCode = neuropix_initialize(); // initializes the headstage with default values
 
 	// 	baseStationAvailable = true;
