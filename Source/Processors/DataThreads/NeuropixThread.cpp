@@ -136,6 +136,8 @@ bool NeuropixThread::startAcquisition()
 	// clear the internal buffer
 	dataBuffer->clear();
 
+	ElectrodePacket packet;
+
 	if (internalTrigger)
 	  ConfigAccessErrorCode caec = neuropix.neuropix_setNeuralStart();
 
@@ -243,9 +245,6 @@ bool NeuropixThread::updateBuffer()
 		{
 			eventCode = (uint64)packet.synchronization[i];
 			timestamp = (int64)packet.ctrs[i][0];
-
-			half_float::half apData[384] = packet.apData[i];
-			data = half_float::half_cast<float, half_float::half>(packet.apData[i]);
 
 			for (int ch = 0; ch < 384; ch++)
 			{
