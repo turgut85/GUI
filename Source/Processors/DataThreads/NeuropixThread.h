@@ -32,6 +32,7 @@
 #include "DataThread.h"
 #include "../GenericProcessor/GenericProcessor.h"
 
+#include "neuropix-api/Neuropix_basestation_api.h"
 
 /**
 
@@ -98,6 +99,8 @@ public:
 private:
     bool baseStationAvailable;
     bool internalTrigger;
+
+	Neuropix_basestation_api neuropix;
 
 };
 

@@ -22,43 +22,52 @@
 */
 
 #include "NeuropixThread.h"
+#include "neuropix-api/ElectrodePacket.h"
 
 #include "neuropix-api/half.hpp"
-#include "neuropix-api/Neuropix_basestation_api.h"
-
 
 
 NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvailable(false)
 {
-
-	Neuropix_basestation_api neuropix;
-
 	OpenErrorCode errorCode = neuropix.neuropix_open(); // establishes a data connection with the basestation
 
 	if (errorCode == OPEN_SUCCESS)
 	{
-		CoreServices::sendStatusMessage("Success.");
+		std::cout << "Open success!" << std::endl;
 		neuropix.neuropix_close();
 	}
 	else {
 		CoreServices::sendStatusMessage("Failure with error code " + String(errorCode));
+		std::cout << "Failure with error code " << String(errorCode) << std::endl;
+		baseStationAvailable = false;
+		return;
 	}
-	// 	errorCode = neuropix_initialize(); // initializes the headstage with default values
 
-	// 	baseStationAvailable = true;
+	baseStationAvailable = true;
+	internalTrigger = true;
 
-	// 	// // GET SYSTEM INFO:
-	// 	// ErrorCode neuropix_getHardwareVersion( version_number_version); ??
-	// 	// ConfigAccessErrorCode caec = neuropix_getBSversion( unsigned char& version major);
-	// 	// ConfigAccessErrorCode caec = neuropix_getBSrevision( unsigned char& version minor);
-	// 	// struct Version_number = neuropix_getAPIVersion();
-	// 	// EepromErrorCode eeec = neuropix_readid(AsicID& id);
-	// } else {
-	// 	baseStationAvailable = false;
-	// }
+	// // GET SYSTEM INFO:
+	VersionNumber hw_version;
+	ErrorCode error1 = neuropix.neuropix_getHardwareVersion(&hw_version);
 
-	// void neuropix_readId(unsigned char* id) // reads 32-bit ID
-	// update the editor 
+	unsigned char bs_version;
+	ConfigAccessErrorCode error2 = neuropix.neuropix_getBSVersion(bs_version);
+
+	unsigned char bs_revision;
+	ConfigAccessErrorCode error3 = neuropix.neuropix_getBSRevision(bs_revision);
+
+	VersionNumber vn = neuropix.neuropix_getAPIVersion();
+
+	AsicID asicId;
+	EepromErrorCode error4 = neuropix.neuropix_readId(asicId);
+
+	std::cout << "  Hardware version number: " << hw_version.major << "." << hw_version.minor << std::endl;
+	std::cout << "  Basestation version number: " << bs_version << std::endl;
+	std::cout << "  Basestation revision number: " << bs_revision << std::endl;
+	std::cout << "  API version number: " << vn.major << "." << vn.minor << std::endl;
+	std::cout << "  Asic info: " << asicId.probeType << std::endl;
+
+	dataBuffer = new DataBuffer(384, 10000); // start with 384 channels and automatically resize
 
 	// channel selections:
 	// Options 1 & 2 -- fixed 384 channels
@@ -119,13 +128,18 @@ bool NeuropixThread::foundInputSource()
 /** Initializes data transfer.*/
 bool NeuropixThread::startAcquisition()
 {
-	// // clear the buffer
-    // neuropix_nrst(false);
-    // neuropix_resetDatapath();
-    // neuropix_nrst(true);
+	// clear the neuropix buffer
+    neuropix.neuropix_nrst(false);
+    neuropix.neuropix_resetDatapath();
+    neuropix.neuropix_nrst(true);
 
-	//if (internalTrigger)
-	// ConfigAccessErrorCode caec neuropix_setNeuralStart();
+	// clear the internal buffer
+	dataBuffer->clear();
+
+	if (internalTrigger)
+	  ConfigAccessErrorCode caec = neuropix.neuropix_setNeuralStart();
+
+	startThread();
 
 	return true;
 }
@@ -133,7 +147,13 @@ bool NeuropixThread::startAcquisition()
 /** Stops data transfer.*/
 bool NeuropixThread::stopAcquisition()
 {
-	// neuropix_nrst(false);
+
+	if (isThreadRunning())
+	{
+		signalThreadShouldExit();
+	}
+
+	neuropix.neuropix_nrst(false);
 	return true;
 }
 
@@ -207,26 +227,59 @@ void NeuropixThread::setTriggerMode(bool trigger)
 bool NeuropixThread::updateBuffer()
 {
 
-	// ElectrodePacket packet;
+	ElectrodePacket packet = ElectrodePacket();
 
-	// ReadErrorCode rec = neuropix_readelectrodedata(packet);
+	ReadErrorCode rec = neuropix.neuropix_readElectrodeData(packet);
 
-	// int64 timetamp = 0;
-	// uint64 eventCode = 0;
-	// float[384] data;
+//	ReadErrorCode rec = DATA_ERROR;
 
-	// for (int i = 0; i < 12; i++)
-	// { 
-	// 	eventCode = (uint64) packet.synchronization[i];
-	// 	timetamp = (int64) packet.ctrs[i][0];
+	if (rec == READ_SUCCESS)
+	{
+		int64 timestamp = 0;
+		uint64 eventCode = 0;
+		float data[384] = { 0.0 };
 
-	// 	for (int ch = 0; ch < 384; ch++)
-	// 	{
-	// 		data[ch] = (float) packet.ap_data[i,ch];
-	// 	}
+		for (int i = 0; i < 12; i++)
+		{
+			eventCode = (uint64)packet.synchronization[i];
+			timestamp = (int64)packet.ctrs[i][0];
 
-	// 	dataBuffer->addToBuffer(data, &timestamp, &eventCode, 1);
- //    }
+			half_float::half apData[384] = packet.apData[i];
+			data = half_float::half_cast<float, half_float::half>(packet.apData[i]);
+
+			for (int ch = 0; ch < 384; ch++)
+			{
+				float dataPt = half_float::half_cast<float, half_float::half>(packet.apData[i][ch]);
+				data[ch] = dataPt;
+			}
+			
+			dataBuffer->addToBuffer(data, &timestamp, &eventCode, 1);
+		}
+
+		std::cout << "READ SUCCESS!" << std::endl;
+	
+	}
+	else {
+		if (rec == NO_DATA_LINK)
+		{
+			std::cout << "NO DATA LINK" << std::endl;
+		}
+		else if (rec == WRONG_DATA_MODE)
+		{
+			std::cout << "WRONG DATA MODE" << std::endl;
+		}
+		else if (rec == DATA_BUFFER_EMPTY)
+		{
+			std::cout << "DATA BUFFER EMPTY" << std::endl;
+		}
+		else if (rec == DATA_ERROR)
+		{
+			std::cout << "DATA ERROR" << std::endl;
+		}
+		else {
+			std::cout << "ERROR CODE: " << rec << std::endl;
+		}
+	}
 	 
 	return true;
 }
