@@ -33,6 +33,8 @@
 #include "../GenericProcessor/GenericProcessor.h"
 
 #include "neuropix-api/Neuropix_basestation_api.h"
+#include "neuropix-api/ElectrodePacket.h"
+
 
 /**
 
@@ -101,6 +103,7 @@ private:
     bool internalTrigger;
 
 	Neuropix_basestation_api neuropix;
+	//ScopedPointer<ElectrodePacket> packet;
 
 };
 

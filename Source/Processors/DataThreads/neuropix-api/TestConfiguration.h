@@ -5,9 +5,11 @@
 #ifndef TestConfiguration_h_
 #define TestConfiguration_h_
 
+#include "dll_import_export.h"
+
 #include <vector>
 
-class TestConfiguration
+class DLL_IMPORT_EXPORT TestConfiguration
 {
 public:
   TestConfiguration();

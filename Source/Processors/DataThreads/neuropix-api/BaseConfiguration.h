@@ -5,6 +5,8 @@
 #ifndef BaseConfiguration_h_
 #define BaseConfiguration_h_
 
+#include "dll_import_export.h"
+
 #include <vector>
 
 /**
@@ -16,8 +18,9 @@ enum BaseConfigErrorCode
   ILLEGAL_ADC_NUMBER     = 1, /**< adc number out of range (valid: 0 to 31) */
   ILLEGAL_CHANNEL_NUMBER = 2, /**< channel number out of range (valid: 0 to 383) */
   ILLEGAL_WRITE_VALUE    = 3, /**< value to write out of range */
-  BASECONFIG_WRITE_ERROR = 4  /**< error writing base configuration shift
+  BASECONFIG_WRITE_ERROR = 4, /**< error writing base configuration shift
                                 register */
+  ILLEGAL_CHAN_REF_READ  = 5  /**< in case a ChannelRefxxx contains more than 1 ones*/
 };
 
 /**
@@ -67,7 +70,7 @@ struct AdditionalSettings {
 
 struct AsicID;
 
-class BaseConfiguration
+class DLL_IMPORT_EXPORT BaseConfiguration
 {
 public:
   BaseConfiguration(AsicID * asicid);
@@ -98,8 +101,11 @@ public:
    * of the base configuration.
    *
    * @param chain : the chain to translate
+   *
+   * @return BASECONFIG_SUCCESS if successful,
+   *         ILLEGAL_READ_VALUE in case a ChannelRefxxx contains more than 1 ones
    */
-  void getBaseConfigFromChain(std::vector<bool> & chain);
+  BaseConfigErrorCode getBaseConfigFromChain(std::vector<bool> & chain);
 
   /**
    * This function returns a vector containing the elements of the

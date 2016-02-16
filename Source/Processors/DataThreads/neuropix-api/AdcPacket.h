@@ -6,17 +6,17 @@
 #ifndef AdcPacket_h_
 #define AdcPacket_h_
 
-#include "half.hpp"
+#include "dll_import_export.h"
 
 /**
  * AdcSubPacket : contains 1 counter value and all 32 adc data words.
  */
 struct AdcSubPacket {
   unsigned int ctr;
-  half_float::half adcData [32]; // in Volts
+  float adcData [32]; // in Volts
 };
 
-class AdcPacket
+class DLL_IMPORT_EXPORT AdcPacket
 {
 public:
   AdcPacket();

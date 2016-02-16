@@ -22,7 +22,6 @@
 */
 
 #include "NeuropixThread.h"
-#include "neuropix-api/ElectrodePacket.h"
 
 #include "neuropix-api/half.hpp"
 
@@ -65,9 +64,11 @@ NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvai
 	std::cout << "  Basestation version number: " << bs_version << std::endl;
 	std::cout << "  Basestation revision number: " << bs_revision << std::endl;
 	std::cout << "  API version number: " << vn.major << "." << vn.minor << std::endl;
-	std::cout << "  Asic info: " << asicId.probeType << std::endl;
+//	std::cout << "  Asic info: " << asicId.probeType << std::endl;
 
 	dataBuffer = new DataBuffer(384, 10000); // start with 384 channels and automatically resize
+
+	//packet = new ElectrodePacket(); why doesn't this work???
 
 	// channel selections:
 	// Options 1 & 2 -- fixed 384 channels
@@ -136,8 +137,6 @@ bool NeuropixThread::startAcquisition()
 	// clear the internal buffer
 	dataBuffer->clear();
 
-	ElectrodePacket packet;
-
 	if (internalTrigger)
 	  ConfigAccessErrorCode caec = neuropix.neuropix_setNeuralStart();
 
@@ -192,7 +191,7 @@ float NeuropixThread::getBitVolts(Channel* chan)
 /** Returns the number of event channels of the data source.*/
 int NeuropixThread::getNumEventChannels()
 {
-	return 0;
+	return 16;
 }
 
 void NeuropixThread::selectElectrode(int chNum, int connection)
@@ -229,11 +228,9 @@ void NeuropixThread::setTriggerMode(bool trigger)
 bool NeuropixThread::updateBuffer()
 {
 
-	ElectrodePacket packet = ElectrodePacket();
+	ElectrodePacket packet;
 
 	ReadErrorCode rec = neuropix.neuropix_readElectrodeData(packet);
-
-//	ReadErrorCode rec = DATA_ERROR;
 
 	if (rec == READ_SUCCESS)
 	{
@@ -248,8 +245,8 @@ bool NeuropixThread::updateBuffer()
 
 			for (int ch = 0; ch < 384; ch++)
 			{
-				float dataPt = half_float::half_cast<float, half_float::half>(packet.apData[i][ch]);
-				data[ch] = dataPt;
+				//float dataPt = half_float::half_cast<float, half_float::half>(packet.apData[i][ch]);
+				data[ch] = packet.apData[i][ch];
 			}
 			
 			dataBuffer->addToBuffer(data, &timestamp, &eventCode, 1);

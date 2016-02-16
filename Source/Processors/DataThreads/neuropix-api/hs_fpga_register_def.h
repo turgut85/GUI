@@ -126,9 +126,9 @@ const unsigned char HS_CONF_SC3_RECEIVE_POS  = 0;
 const unsigned char HS_CONF_SC3_RECEIVE_MASK = 0xff;
 
 // Headstage EEPROM General Register
-const unsigned char HS_EEPROM_GEN_ADDR        = 0x60;
-const unsigned char HS_EEPROM_GEN_ACTIVE_POS  = 0;
-const unsigned char HS_EEPROM_GEN_ACTIVE_MASK = 0x01;
+const unsigned char HS_EEPROM_GEN_ADDR           = 0x60;
+const unsigned char HS_EEPROM_GEN_START_SEQ_POS  = 0;
+const unsigned char HS_EEPROM_GEN_START_SEQ_MASK = 0x01;
 
 // Headstage EEPROM Error/Status Register
 const unsigned char HS_EEPROM_ERR_ADDR         = 0x61;
@@ -143,6 +143,7 @@ const unsigned char HS_EEPROM_CMD_COMMAND_POS  = 0;
 const unsigned char HS_EEPROM_CMD_COMMAND_MASK = 0xff;
 const unsigned char HS_EEPROM_CMD_READ         = 0x03;
 const unsigned char HS_EEPROM_CMD_WRITE        = 0x6c;
+const unsigned char HS_EEPROM_CMD_WREN         = 0x96;
 
 // Headstage EEPROM Write Register
 const unsigned char HS_EEPROM_WR_ADDR            = 0x63;

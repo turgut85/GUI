@@ -5,6 +5,8 @@
 #ifndef Neuropix_basestation_api_h_
 #define Neuropix_basestation_api_h_
 
+#include "dll_import_export.h"
+
 class NeuropixConnectionLinkIntf;
 class VciInterface;
 class neuroprobe;
@@ -19,15 +21,15 @@ class neuroprobe;
 #include <vector>
 #include <string>
 #include <fstream>
+#include <map>
+#include <cstdlib>
 
 /**
  * Asic ID register
  */
 struct AsicID {
-  unsigned int runId; /**< 19 bit */
-  char waferNumber;   /**< 5  bit */
-  char reticleNumber; /**< 6  bit */
-  char probeType;     /**< 2  bit : indicates option */
+  unsigned int serialNumber; /**< 30 bit */
+  char probeType;            /**< 2  bit : indicates option */
 };
 
 /**
@@ -79,8 +81,11 @@ enum OpenErrorCode
                                        startTrigger_output_enable */
   CONFIG_NEURAL_START_FAILED   = 17, /**< error while configuring basestation
                                        neural_start */
-  CONFIG_SYNC_EXT_START_FAILED = 18 /**< error while configuring basestation
+  CONFIG_SYNC_EXT_START_FAILED = 18, /**< error while configuring basestation
                                        startTrigger_output */
+  CONFIG_CALIB_FAILED          = 19, /**< error while configuring members for
+                                       calibration */
+  CONFIG_EN_EEPROM_FAILED      = 20  /**< error while enabling the eeprom */
 };
 
 enum ConfigDesError
@@ -135,15 +140,18 @@ enum UartErrorCode
  */
 enum ShiftRegisterAccessErrorCode
 {
-  SHIFTREG_SUCCESS           = 0, /**< access of shift register successful */
-  SHIFTREG_GETMODE_ERROR     = 1, /**< error while reading the mode */
-  SHIFTREG_SETMODE_ERROR     = 2, /**< error while writing the mode */
-  SHIFTREG_HS_UART_GEN_ERROR = 3, /**< error while writing HS_UART_GEN */
-  SHIFTREG_HS_TX_ERROR       = 4, /**< error while writing shift reg */
-  SHIFTREG_HS_RX_ERROR       = 5, /**< error while reading shift reg */
-  SHIFTREG_BITCHAIN_ERROR    = 6, /**< bitchain incorrect */
-  SHIFTREG_OPTION_ERROR      = 7, /**< option incorrect */
-  SHIFTREG_CONFIG_ERROR      = 8  /**< error while configuring bs fpga */
+  SHIFTREG_SUCCESS               = 0, /**< access of shift register successful */
+  SHIFTREG_GETMODE_ERROR         = 1, /**< error while reading the mode */
+  SHIFTREG_SETMODE_ERROR         = 2, /**< error while writing the mode */
+  SHIFTREG_HS_UART_GEN_ERROR     = 3, /**< error while writing HS_UART_GEN */
+  SHIFTREG_HS_TX_ERROR           = 4, /**< error while writing shift reg */
+  SHIFTREG_HS_RX_ERROR           = 5, /**< error while reading shift reg */
+  SHIFTREG_BITCHAIN_ERROR        = 6, /**< bitchain incorrect */
+  SHIFTREG_OPTION_ERROR          = 7, /**< option incorrect */
+  SHIFTREG_CONFIG_ERROR          = 8, /**< error while configuring bs fpga */
+  SHIFTREG_ILLEGAL_CHAN_REF_READ = 9  /**<  in case a ChannelRefxxx contains
+                                        more than 1 ones when reading out the
+                                        base configuration shift register */
 };
 
 /**
@@ -175,7 +183,7 @@ enum DacControlErrorCode
   DACCTRL_SUCCESS                = 0, /**< DAC control registers access successful*/
   DACCTRL_READVAL_ERROR          = 1, /**< uart error while DAC ctrl read */
   DACCTRL_WRITEVAL_ERROR         = 2, /**< uart error while DAC ctrl write */
-  DACCTRL_WRITE_VAL_OUT_OF_RANGE = 3  /**< value to write is out of range */
+  DACCTRL_WRITE_VAL_OUT_OF_RANGE = 3  /**< value to write is unvalid */
 };
 
 /**
@@ -205,8 +213,10 @@ enum CalibErrorCode
   CALIB_PREVIOUSCALIB_ERROR  = 8, /**< results of previous calibrations not
                                     available */
   CALIB_READASICID_ERROR     = 9, /**< error while reading the ASIC ID */
-  CALIB_SETSHANKCONFIG_ERROR = 10 /**< error while setting shank configuration
+  CALIB_SETSHANKCONFIG_ERROR = 10, /**< error while setting shank configuration
                                    */
+  CALIB_CONFIG_BS_ERROR      = 11  /**< error while writing configuration
+                                     values to the basestation */
 };
 
 /**
@@ -225,7 +235,8 @@ enum EepromErrorCode
   EEPROM_CMD_ERROR      = 8, /**< error writing the command for eeprom access */
   EEPROM_NO_ACK_ERROR   = 9, /**< no ack received                             */
   EEPROM_ACK_ERROR      = 10,/**< an eeprom acknowledge error was detected    */
-  EEPROM_WRITEVAL_ERROR = 11 /**< write value out of valid range              */
+  EEPROM_WRITEVAL_ERROR = 11, /**< write value out of valid range             */
+  EEPROM_START_SEQ_ERROR = 12  /**< error writing the start seq bit to eeprom */
 };
 
 /**
@@ -287,6 +298,17 @@ enum BistTest9ErrorCode
   BISTTEST9_DIGCTRL_ERR = 2  /**< BIST Test 9 digital control access failed */
 };
 
+/**
+ * Error code for reading from a csv file.
+ */
+enum ReadCsvErrorCode
+{
+  READCSV_SUCCESS            = 0, /**< Reading the csv file was successful*/
+  READCSV_FILE_ERR           = 1, /**< Error opening the filestream of the csv*/
+  READCSV_NUMBER_OF_ELEMENTS = 2, /**< Invalid number of elements read*/
+  READCSV_OUT_OF_RANGE       = 3  /**< Read element is out of range*/
+};
+
 enum AsicMode
 {
   ASIC_CONFIGURATION = 0,
@@ -295,7 +317,7 @@ enum AsicMode
   ASIC_RECORDING     = 3
 };
 
-class Neuropix_basestation_api
+class DLL_IMPORT_EXPORT Neuropix_basestation_api
 {
 public:
   Neuropix_basestation_api();
@@ -417,6 +439,147 @@ public:
    * @return EEPROM_SUCCESS if successful
    */
   EepromErrorCode neuropix_writeADCCalibration();
+
+  /**
+   * This function writes the ADC slope calibration values (slope, coarse and
+   * fine) to the given csv file.
+   *
+   * @param filename : the filename to write to, (should be .csv) default is
+   *                   adcSlopeCalValues.csv
+   */
+  void neuropix_writeADCSlopeCalibrationToCsv(std::string filename = "adcSlopeCalValues.csv");
+
+  /**
+   * This function writes the ADC offset calibration values (cfix) to the given
+   * csv file.
+   *
+   * @param filename : the filename to write to (should be .csv), default is
+   *                   adcOffsetCalValues.csv
+   */
+  void neuropix_writeADCOffsetCalibrationToCsv(std::string filename = "adcOffsetCalValues.csv");
+
+  /**
+   * This function writes the comparator offset calibration values (compP and
+   * compN) to the given csv file.
+   *
+   * @param filename : the filename to write to (should be .csv), default is
+   *                   comparatorCalValues.csv
+   */
+  void neuropix_writeComparatorCalibrationToCsv(std::string filename = "comparatorCalValues.csv");
+
+  /**
+   * This function writes the gain correction values from calibration to the
+   * given csv file.
+   *
+   * @param filename : the filename to write to (should be .csv), default is
+   *                   gainCorrCalValues.csv
+   */
+  void neuropix_writeGainCorrectionCalibrationToCsv(std::string filename = "gainCorrCalValues.csv");
+
+  /**
+   * This function reads the ADC slope calibration values (slope, coarse and
+   * fine) from the given csv file.
+   *
+   * @param filename : the filename to read from (should be .csv), default is
+   *                   adcSlopeCalValues.csv
+   *
+   * @return READCSV_SUCCES if succesful
+   */
+  ReadCsvErrorCode neuropix_readADCSlopeCalibrationFromCsv(std::string filename = "adcSlopeCalValues.csv");
+
+  /**
+   * This function reads the ADC offset calibration values (cfix) from the given
+   * csv file.
+   *
+   * @param filename : the filename to read from (should be .csv), default is
+   *                   adcOffsetCalValues.csv
+   *
+   * @return READCSV_SUCCES if succesful
+   */
+  ReadCsvErrorCode neuropix_readADCOffsetCalibrationFromCsv(std::string filename = "adcOffsetCalValues.csv");
+
+  /**
+   * This function reads the comparator calibration values (compP and compN)
+   * from the given csv file.
+   *
+   * @param filename : the filename to read from (should be .csv), default is
+   *                   comparatorCalValues.csv
+   *
+   * @return READCSV_SUCCES if succesful
+   */
+  ReadCsvErrorCode neuropix_readComparatorCalibrationFromCsv(std::string filename = "comparatorCalValues.csv");
+
+  /**
+   * This function reads the gain calibration values (gain correction factors)
+   * from the given csv file.
+   *
+   * @param filename : the filename to read from (should be .csv), default is
+   *                   gainCalValues.csv
+   *
+   * @return READCSV_SUCCES if succesful
+   */
+  ReadCsvErrorCode neuropix_readGainCalibrationFromCsv(std::string filename = "gainCalValues.csv");
+
+  /**
+   * This function writes the base configuration register as a bit chain to the
+   * given csv file.
+   *
+   * @param filename : the filename to write to (should be .csv), default is
+   *                   baseConfiguration.csv
+   */
+  void neuropix_writeBaseConfigurationToCsv(std::string filename = "baseConfiguration.csv");
+
+  /**
+   * This function writes the shank configuration register as a bit chain to the
+   * given csv file.
+   *
+   * @param filename : the filename to write to (should be .csv), default is
+   *                   shankConfiguration.csv
+   */
+  void neuropix_writeShankConfigurationToCsv(std::string filename = "shankConfiguration.csv");
+
+  /**
+   * This function writes the test configuration register as a bit chain to the
+   * given csv file.
+   *
+   * @param filename : the filename to write to (should be .csv), default is
+   *                   testConfiguration.csv
+   */
+  void neuropix_writeTestConfigurationToCsv(std::string filename = "testConfiguration.csv");
+
+  /**
+   * This function reads the base configuration register as a bit chain from the
+   * given csv file, and loads it into the base configuration member of the api.
+   *
+   * @param filename : the filename to read from (should be .csv), default is
+   *                   baseConfiguration.csv
+   *
+   * @return READCSV_SUCCESS if succesful
+   */
+  ReadCsvErrorCode neuropix_readBaseConfigurationFromCsv(std::string filename = "baseConfiguration.csv");
+
+  /**
+   * This function reads the shank configuration register as a bit chain from
+   * the given csv file, and loads it into the shank configuration member of the
+   * api.
+   *
+   * @param filename : the filename to read from (should be .csv), default is
+   *                   shankConfiguration.csv
+   *
+   * @return READCSV_SUCCESS if succesful
+   */
+  ReadCsvErrorCode neuropix_readShankConfigurationFromCsv(std::string filename = "shankConfiguration.csv");
+
+  /**
+   * This function reads the test configuration register as a bit chain from the
+   * given csv file, and loads it into the test configuration member of the api.
+   *
+   * @param filename : the filename to read from (should be .csv), default is
+   *                   testConfiguration.csv
+   *
+   * @return READCSV_SUCCESS if succesful
+   */
+  ReadCsvErrorCode neuropix_readTestConfigurationFromCsv(std::string filename = "testConfiguration.csv");
 
 
   /**
@@ -746,6 +909,16 @@ public:
   bool neuropix_getDatamode();
 
   /**
+   * This function reads the data mode from the basestation.
+   *
+   * @param mode : the data mode
+   *
+   * @return NO_DATA_LINK when datamodel does not exist,
+   *         READ_SUCCESS if succesful
+   */
+  ReadErrorCode neuropix_readDatamodeFromBS(bool & mode);
+
+  /**
    * This function reads an electrode packet of data.
    *
    * @param result: the resulting packet of electrode data
@@ -844,16 +1017,11 @@ public:
    * This function selects the DC output channel of DAC A and configures its
    * voltage level.
    *
-   * @param voltage : 16 bit value that corresponds with the DC output voltage
-   * level :
-   * 0x0000 => 0V
-   * 0xffff => 2.5V
-   * so there is a step of 2.5V/65535 between each value, but the valid range
-   * here is 0 to 0x7ae0 corresponding to 0V to 1.19997V
+   * @param voltage : the DC output voltage in mV
    *
    * @return error of DacControlErrorCode
    */
-  DacControlErrorCode neuropix_generateDC(unsigned short voltage);
+  DacControlErrorCode neuropix_generateDC(std::string voltage);
 
   /**
    * This function gets the DAC Control values.
@@ -867,7 +1035,7 @@ public:
    * @return error of DacControlErrorCode
    */
   DacControlErrorCode neuropix_getDacControl(int & frequency, int & amplitude,
-                                             bool & offset, unsigned short &
+                                             bool & offset, std::string &
                                              voltage, DacControlStatusCode &
                                              status);
 
@@ -1024,41 +1192,56 @@ public:
    * This function calibrates the offset of each ASIC ADC, by searching the
    * ideal cfix parameter.
    *
+   * @param fileName : the file name to save the results to, should be .csv,
+   *                   default file name is results_adcOffsetCalibration.csv
+   *
    * @return CALIB_SUCCESS if successful
    */
-  CalibErrorCode neuropix_ADCOffsetCalibration();
+  CalibErrorCode neuropix_ADCOffsetCalibration(std::string fileName = "results_adcOffsetCalibration.csv");
 
   /**
    * This function calibrates the slope of each ASIC ADC, by searching the ideal
    * slope, coarse and fine parameters.
    *
+   * @param fileName : the file name to save the results to, should be .csv,
+   *                   default file name is results_adcSlopeCalibration.csv
+   *
    * @return CALIB_SUCCESS if successful
    */
-  CalibErrorCode neuropix_ADCSlopeCalibration();
+  CalibErrorCode neuropix_ADCSlopeCalibration(std::string fileName = "results_adcSlopeCalibration.csv");
 
   /**
    * This function calibrates the comparator of each ASIC ADC, by searching the
    * ideal compP and compN parameters.
    *
+   * @param fileName : the file name to save the results to, should be .csv,
+   *                   default file name is results_comparatorCalibration.csv
+   *
    * @return CALIB_SUCCESS if successful
    */
-  CalibErrorCode neuropix_comparatorCalibration();
+  CalibErrorCode neuropix_comparatorCalibration(std::string fileName = "results_comparatorCalibration.csv");
 
   /**
    * This function calculates the gain correction parameters for each electrode
    * on the ASIC.
    *
+   * @param fileName : the file name to save the results to, should be .csv,
+   *                   default file name is results_gainCalibration.csv
+   *
    * @return CALIB_SUCCESS if successful
    */
-  CalibErrorCode neuropix_gainCalibration();
+  CalibErrorCode neuropix_gainCalibration(std::string fileName = "results_gainCalibration.csv");
 
 
   /**
    * This function calculates the impedance for each electrode.
    *
+   * @param fileName : the file name to save the results to, should be .csv,
+   *                   default file name is results_impedanceMeasurement.csv
+   *
    * @return CALIB_SUCCESS if successful
    */
-  CalibErrorCode neuropix_impedanceMeasurement();
+  CalibErrorCode neuropix_impedanceMeasurement(std::string fileName = "results_impedanceMeasurement.csv");
 
 
 
@@ -1661,6 +1844,27 @@ public:
   ShiftRegisterAccessErrorCode neuropix_readShiftRegister(unsigned char shift_select,
                                                  std::vector<bool> & chain,
                                                  unsigned int shift_length);
+
+  /**
+   * This function handles writing to the EEPROM.
+   *
+   * @param address : the address to write to
+   * @param byte    : the byte to write
+   *
+   * @return EEPROM_SUCCESS if successful
+   */
+  EepromErrorCode neuropix_writeEeprom(short int address, unsigned char byte);
+
+  /**
+   * This function handles reading from the EEPROM.
+   *
+   * @param address : the address to read from
+   * @param byte    : the byte that was read to return
+   *
+   * @return EEPROM_SUCCESS if successful
+   */
+  EepromErrorCode neuropix_readEeprom(short int address, unsigned char & byte);
+
 protected:
   NeuropixConnectionLinkIntf * tcpConnectionLink_;
   VciInterface * vciIntf_;
@@ -1689,8 +1893,9 @@ private:
   // to avoid many alloc/free, allocate only once
   float ** slopesPerSlopecalAdc_;
   double * time_;
-  half_float::half * electrodedata_;
+  float * electrodedata_;
 
+  std::map<std::string, unsigned short int> DACTable_;
 
   /**
    * This function handles the startup configuration steps for adc calibration.
@@ -1698,26 +1903,6 @@ private:
    * @return CALIB_SUCCESS if successful
    */
   CalibErrorCode neuropix_calibrationStartupConfiguration();
-
-  /**
-   * This function handles writing to the EEPROM.
-   *
-   * @param address : the address to write to
-   * @param byte    : the byte to write
-   *
-   * @return EEPROM_SUCCESS if successful
-   */
-  EepromErrorCode neuropix_writeEeprom(short int address, unsigned char byte);
-
-  /**
-   * This function handles reading from the EEPROM.
-   *
-   * @param address : the address to read from
-   * @param byte    : the byte that was read to return
-   *
-   * @return EEPROM_SUCCESS if successful
-   */
-  EepromErrorCode neuropix_readEeprom(short int address, unsigned char & byte);
 
   /**
    * This function sets NEURAL_START
@@ -1730,9 +1915,142 @@ private:
   ConfigAccessErrorCode setNeuralStart(bool value);
 
   /**
+   * This function writes the calibrated slope, coarse and fine values for each
+   * ADC pair to a csv file, with the ADC slope that resulted from the
+   * calibration calculations.
+   *
+   * @param adcSlopes : the slopes per ADC that resulted in the best combined
+   *                    distances
+   * @param fileName  : the name of the file to save to
+   */
+  void writeSlopeCalibrationToCsv(float adcSlopes[32], std::string fileName);
+
+  /**
+   * This function writes the calibrated cfix values for each ADC pair to a csv
+   * file, with the ADC offset code that resulted from the calibration
+   * calculations.
+   *
+   * @param adcPairOutputCode : the digital output codes per ADC pair that
+   *                            resulted in the optimal cfix values
+   * @param fileName          : the name of the file to save to
+   */
+  void writeOffsetCalibrationToCsv(float adcPairOutput[32],
+                                   std::string fileName);
+
+  /**
+   * This function writes the calibrated comparator CompP and CompN values to a
+   * csv file, with the corresponding percentage of ones that resulted from the
+   * calibration calculations.
+   *
+   * @param onesPerAdc : the percentage of ones that resulted in the optimal
+   *                     comparator values
+   * @param fileName   : the name of the file to save to
+   */
+  void writeComparatorCalibrationToCsv(double onesPerAdc[32],
+                                       std::string fileName);
+
+  /**
+   * This function writes the calibrated gain correction factors to a csv file,
+   * with the corresponding signal amplitudes that resulted from the calibration
+   * calculations.
+   *
+   * @param amplitudesPerElectrode : the signal amplitudes that resulted in the
+   *                                 optimal gain correction factors
+   * @param fileName               : the name of the file to save to
+   */
+  void writeGainCalibrationToCsv(std::vector<double> amplitudesPerElectrode,
+                                 std::string fileName);
+
+  /**
+   * This function writes the measured impedances for each electrode to a csv
+   * file.
+   *
+   * @param fileName : the name of the file to save to
+   */
+  void writeImpedancesToCsv(std::string fileName);
+
+  /**
+   * This function adds the slope, coarse and fine values, as stored in the
+   * calibration member, to the given (opened) filestream.
+   *
+   * @param filestream : the opened filestream to add the values to.
+   */
+  void addSlopeCalibrationValuesToFilestream(std::ofstream & filestream);
+
+  /**
+   * This function adds the cfix values as stored in the calibration member, to
+   * the given (opened) filestream.
+   *
+   * @param filestream : the opened filestream to add the values to.
+   */
+  void addOffsetCalibrationValuesToFilestream(std::ofstream & filestream);
+
+  /**
+   * This function adds the compP and compN values, as stored in the calibration
+   * member, to the given (opened) filestream.
+   *
+   * @param filestream : the opened filestream to add the values to.
+   */
+  void addComparatorCalibrationValuesToFilestream(std::ofstream & filestream);
+
+  /**
+   * This function adds the gain correction factors, as stored in the
+   * calibration member, to the given (opened) filestream.
+   *
+   * @param filestream : the opened filestream to add the values to.
+   */
+  void addGainCalibrationValuesToFilestream(std::ofstream & filestream);
+
+  /**
+   * This function handles one string line of a csv file, and splits it into a
+   * vector of strings.
+   *
+   * @param line   : the string line to split
+   * @param vector : the string vector of the splitted cells
+   */
+  void splitCsvLineIntoCells(std::string line, std::vector<std::string> &
+                             cells);
+
+  /**
+   * This function handles the writing of a chain to a csv file.
+   *
+   * @param filename : the file to write to (should be .csv)
+   * @param chain    : the chain to write
+   */
+  void writeChainToCsv(std::string filename, std::vector<bool> & chain);
+
+  /**
+   * This function handles the reading a chain from a csv file.
+   *
+   * @param filename : the file to read from (should be .csv)
+   * @param chain    : the chain that was read
+   *
+   * @return READCSV_SUCCESS if succesful
+   */
+  ReadCsvErrorCode readChainFromCsv(std::string filename, std::vector<bool> & chain);
+
+  /**
    * flush DRAM fifo / data connection
    */
   virtual ErrorCode neuropix_flushData();
+
+  /**
+   * This function skips the chosen amount of adc data.
+   *
+   * @param numberOfPackets : the number of adc packets to skip
+   *
+   * @return READ_SUCCESS if succesful
+   */
+  virtual ReadErrorCode skipAdcData(unsigned int numberOfPackets);
+
+  /**
+   * This function skips the chosen amount of electrode data.
+   *
+   * @param numberOfPackets : the number of electrode packets to skip
+   *
+   * @return READ_SUCCESS if succesful
+   */
+  virtual ReadErrorCode skipElectrodeData(unsigned int numberOfPackets);
 
   // TODO
   void neuropix_resetUart();

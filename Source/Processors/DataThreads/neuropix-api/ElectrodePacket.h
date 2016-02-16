@@ -6,9 +6,9 @@
 #ifndef ElectrodePacket_h_
 #define ElectrodePacket_h_
 
-#include "half.hpp"
+#include "dll_import_export.h"
 
-class ElectrodePacket
+class DLL_IMPORT_EXPORT ElectrodePacket
 {
 public:
   ElectrodePacket();
@@ -37,12 +37,12 @@ public:
   /**
    * The complete set of 384 lfp data words, 1 per channel.
    */
-  half_float::half lfpData [384]; // in Volts
+  float lfpData [384]; // in Volts
 
   /**
    * 12 sets of 384 ap data words, 1 per channel.
    */
-  half_float::half apData [12][384]; // in Volts
+  float apData [12][384]; // in Volts
 
 
 private:

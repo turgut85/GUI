@@ -5,6 +5,8 @@
 #ifndef ShankConfiguration_h_
 #define ShankConfiguration_h_
 
+#include "dll_import_export.h"
+
 #include <vector>
 
 /**
@@ -32,7 +34,7 @@ enum ElectrodeConnection
 
 struct AsicID;
 
-class ShankConfiguration
+class DLL_IMPORT_EXPORT ShankConfiguration
 {
 public:
   ShankConfiguration(AsicID * asicid);
