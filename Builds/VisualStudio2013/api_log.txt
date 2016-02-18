@@ -11,11 +11,11 @@ neuropix_writeLCD(    Neuropix    ,   BaseStation  ) called
 neuropix_headstageReadRegister(11, unsigned char & value) called
 neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
 ack byte: c3
-read byte: f4
+read byte: 0
 with success
-read value = f4
-neuropix_headstageWriteRegister(11, f4) called
-neuropix_writeUart(40, 11, f4) called
+read value = 0
+neuropix_headstageWriteRegister(11, 4) called
+neuropix_writeUart(40, 11, 4) called
 ack byte: c3
 with success
 neuropix_headstageWriteRegister(65, a0) called
@@ -31,15 +31,20 @@ enable hamming sucessfully configured in serializer
 neuropix_configureDeserializer() called
 neuropix_deserializerWriteRegister(7, 12) called
 neuropix_writeUart(90, 7, 12) called
+ack byte: ff
+without success
+neuropix_configureDeserializer() called
+neuropix_deserializerWriteRegister(7, 12) called
+neuropix_writeUart(90, 7, 12) called
 ack byte: c3
 with success
 enable hamming sucessfully configured in deserializer
 neuropix_headstageReadRegister(10, unsigned char & value) called
 neuropix_readUart(40, 10, std::vector<unsigned char> & data) called
 ack byte: c3
-read byte: e
+read byte: c
 with success
-read value = e
+read value = c
 neuropix_headstageWriteRegister(10, e) called
 neuropix_writeUart(40, 10, e) called
 ack byte: c3
@@ -59,22 +64,22 @@ successfully configured headstage TE to 0
 neuropix_headstageReadRegister(11, unsigned char & value) called
 neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
 ack byte: c3
-read byte: f4
+read byte: 4
 with success
-read value = f4
-neuropix_headstageWriteRegister(11, f4) called
-neuropix_writeUart(40, 11, f4) called
+read value = 4
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
 ack byte: c3
 with success
 successfully configured headstage PR_NRST to 1
 neuropix_headstageReadRegister(11, unsigned char & value) called
 neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
 ack byte: c3
-read byte: f4
+read byte: 24
 with success
-read value = f4
-neuropix_headstageWriteRegister(11, f4) called
-neuropix_writeUart(40, 11, f4) called
+read value = 24
+neuropix_headstageWriteRegister(11, 34) called
+neuropix_writeUart(40, 11, 34) called
 ack byte: c3
 with success
 successfully configured headstage NRST to 1
@@ -82,25 +87,25 @@ neuropix_mode(0) called
 neuropix_headstageReadRegister(11, unsigned char & value) called
 neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
 ack byte: c3
-read byte: f4
+read byte: 34
 with success
-read value = f4
+read value = 34
 neuropix_headstageReadRegister(11, unsigned char & value) called
 neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
 ack byte: c3
-read byte: f4
+read byte: 34
 with success
-read value = f4
-neuropix_headstageWriteRegister(11, e4) called
-neuropix_writeUart(40, 11, e4) called
+read value = 34
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
 ack byte: c3
 with success
 neuropix_headstageReadRegister(11, unsigned char & value) called
 neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
 ack byte: c3
-read byte: e4
+read byte: 24
 with success
-read value = e4
+read value = 24
 neuropix_headstageWriteRegister(11, 24) called
 neuropix_writeUart(40, 11, 24) called
 ack byte: c3
@@ -259,34 +264,761 @@ successfully configured basestation startTrigger_output_enable to 1
 successfully configured basestation neural_start to 0
 successfully configured basestation startTrigger_output to 0
 neuropix_open() done
-neuropix_close() called
-data link disConnected
-configuration link disConnected
-api datamodel_ member deleted
 neuropix_getHardwareVersion(VersionNumber version)
+-> {2, 1)
 neuropix_getAPIVersion() called
 -> {2, 6}
 called neuropix_readId(AsicID & id)
 neuropix_headstageWriteRegister(61, 11) called
 neuropix_writeUart(40, 61, 11) called
-no configuration link existing
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(66, 0) called
+neuropix_writeUart(40, 66, 0) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(67, 0) called
+neuropix_writeUart(40, 67, 0) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(62, 3) called
+neuropix_writeUart(40, 62, 3) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(60, 1) called
+neuropix_writeUart(40, 60, 1) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(60, 0) called
+neuropix_writeUart(40, 60, 0) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(61, unsigned char & value) called
+neuropix_readUart(40, 61, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 0
+with success
+read value = 0
+neuropix_setGain(0, 0, 0) called
+ap = 0 and lfp = 0 gain for channel 0 successfully written to api member baseConfiguration
+neuropix_writeBaseRegister() called
+neuropix_readMode(unsigned char mode) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+mode = 3
+neuropix_mode(0) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, 34) called
+neuropix_writeUart(40, 11, 34) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(50, 0) called
+neuropix_writeUart(40, 50, 0) called
+ack byte: c3
+with success
+neuropix_writeUart(40, 51, d4) called
+accelerated TRANSMIT
+neuropix_writeUart(40, 51, 1d4) called
+accelerated TRANSMIT
+neuropix_readUart(40, 52, std::vector<unsigned char> & data) called
+accelerated RECEIVE
 neuropix_mode(3) called
 neuropix_headstageReadRegister(11, unsigned char & value) called
 neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
-read value = 3
+ack byte: c3
+read byte: 34
+with success
+read value = 34
 neuropix_headstageReadRegister(11, unsigned char & value) called
 neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
-read value = 90
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
 neuropix_headstageReadRegister(11, unsigned char & value) called
 neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
-read value = 90
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
 neuropix_headstageReadRegister(11, unsigned char & value) called
 neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
-read value = 90
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, f4) called
+neuropix_writeUart(40, 11, f4) called
+ack byte: c3
+with success
+base shift register successfully written
+neuropix_setGain(1, 0, 0) called
+ap = 0 and lfp = 0 gain for channel 1 successfully written to api member baseConfiguration
+neuropix_writeBaseRegister() called
+neuropix_readMode(unsigned char mode) called
 neuropix_headstageReadRegister(11, unsigned char & value) called
 neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
-read value = 90
-neuropix_close() called
-data link disConnected
-configuration link disConnected
-api datamodel_ member deleted
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+mode = 3
+neuropix_mode(0) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, 34) called
+neuropix_writeUart(40, 11, 34) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(50, 0) called
+neuropix_writeUart(40, 50, 0) called
+ack byte: c3
+with success
+neuropix_writeUart(40, 51, d4) called
+accelerated TRANSMIT
+neuropix_writeUart(40, 51, 1d4) called
+accelerated TRANSMIT
+neuropix_readUart(40, 52, std::vector<unsigned char> & data) called
+accelerated RECEIVE
+neuropix_mode(3) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, f4) called
+neuropix_writeUart(40, 11, f4) called
+ack byte: c3
+with success
+base shift register successfully written
+neuropix_setGain(2, 0, 0) called
+ap = 0 and lfp = 0 gain for channel 2 successfully written to api member baseConfiguration
+neuropix_writeBaseRegister() called
+neuropix_readMode(unsigned char mode) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+mode = 3
+neuropix_mode(0) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, 34) called
+neuropix_writeUart(40, 11, 34) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(50, 0) called
+neuropix_writeUart(40, 50, 0) called
+ack byte: c3
+with success
+neuropix_writeUart(40, 51, d4) called
+accelerated TRANSMIT
+neuropix_writeUart(40, 51, 1d4) called
+accelerated TRANSMIT
+neuropix_readUart(40, 52, std::vector<unsigned char> & data) called
+accelerated RECEIVE
+neuropix_mode(3) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, f4) called
+neuropix_writeUart(40, 11, f4) called
+ack byte: c3
+with success
+base shift register successfully written
+neuropix_setGain(3, 0, 0) called
+ap = 0 and lfp = 0 gain for channel 3 successfully written to api member baseConfiguration
+neuropix_writeBaseRegister() called
+neuropix_readMode(unsigned char mode) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+mode = 3
+neuropix_mode(0) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, 34) called
+neuropix_writeUart(40, 11, 34) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(50, 0) called
+neuropix_writeUart(40, 50, 0) called
+ack byte: c3
+with success
+neuropix_writeUart(40, 51, d4) called
+accelerated TRANSMIT
+neuropix_writeUart(40, 51, 1d4) called
+accelerated TRANSMIT
+neuropix_readUart(40, 52, std::vector<unsigned char> & data) called
+accelerated RECEIVE
+neuropix_mode(3) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, f4) called
+neuropix_writeUart(40, 11, f4) called
+ack byte: c3
+with success
+base shift register successfully written
+neuropix_setGain(4, 0, 0) called
+ap = 0 and lfp = 0 gain for channel 4 successfully written to api member baseConfiguration
+neuropix_writeBaseRegister() called
+neuropix_readMode(unsigned char mode) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+mode = 3
+neuropix_mode(0) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, 34) called
+neuropix_writeUart(40, 11, 34) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(50, 0) called
+neuropix_writeUart(40, 50, 0) called
+ack byte: c3
+with success
+neuropix_writeUart(40, 51, d4) called
+accelerated TRANSMIT
+neuropix_writeUart(40, 51, 1d4) called
+accelerated TRANSMIT
+neuropix_readUart(40, 52, std::vector<unsigned char> & data) called
+accelerated RECEIVE
+neuropix_mode(3) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, f4) called
+neuropix_writeUart(40, 11, f4) called
+ack byte: c3
+with success
+base shift register successfully written
+neuropix_setGain(5, 0, 0) called
+ap = 0 and lfp = 0 gain for channel 5 successfully written to api member baseConfiguration
+neuropix_writeBaseRegister() called
+neuropix_readMode(unsigned char mode) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+mode = 3
+neuropix_mode(0) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, 34) called
+neuropix_writeUart(40, 11, 34) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(50, 0) called
+neuropix_writeUart(40, 50, 0) called
+ack byte: c3
+with success
+neuropix_writeUart(40, 51, d4) called
+accelerated TRANSMIT
+neuropix_writeUart(40, 51, 1d4) called
+accelerated TRANSMIT
+neuropix_readUart(40, 52, std::vector<unsigned char> & data) called
+accelerated RECEIVE
+neuropix_mode(3) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, f4) called
+neuropix_writeUart(40, 11, f4) called
+ack byte: c3
+with success
+base shift register successfully written
+neuropix_setGain(6, 0, 0) called
+ap = 0 and lfp = 0 gain for channel 6 successfully written to api member baseConfiguration
+neuropix_writeBaseRegister() called
+neuropix_readMode(unsigned char mode) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+mode = 3
+neuropix_mode(0) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, 34) called
+neuropix_writeUart(40, 11, 34) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(50, 0) called
+neuropix_writeUart(40, 50, 0) called
+ack byte: c3
+with success
+neuropix_writeUart(40, 51, d4) called
+accelerated TRANSMIT
+neuropix_writeUart(40, 51, 1d4) called
+accelerated TRANSMIT
+neuropix_readUart(40, 52, std::vector<unsigned char> & data) called
+accelerated RECEIVE
+neuropix_mode(3) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 34
+with success
+read value = 34
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, f4) called
+neuropix_writeUart(40, 11, f4) called
+ack byte: c3
+with success
+base shift register successfully written
+neuropix_setGain(7, 0, 0) called
+ap = 0 and lfp = 0 gain for channel 7 successfully written to api member baseConfiguration
+neuropix_writeBaseRegister() called
+neuropix_readMode(unsigned char mode) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+mode = 3
+neuropix_mode(0) called
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: f4
+with success
+read value = f4
+neuropix_headstageWriteRegister(11, e4) called
+neuropix_writeUart(40, 11, e4) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: e4
+with success
+read value = e4
+neuropix_headstageWriteRegister(11, 24) called
+neuropix_writeUart(40, 11, 24) called
+ack byte: c3
+with success
+neuropix_headstageReadRegister(11, unsigned char & value) called
+neuropix_readUart(40, 11, std::vector<unsigned char> & data) called
+ack byte: c3
+read byte: 24
+with success
+read value = 24
+neuropix_headstageWriteRegister(11, 34) called
+neuropix_writeUart(40, 11, 34) called
+ack byte: c3
+with success
+neuropix_headstageWriteRegister(50, 0) called
+neuropix_writeUart(40, 50, 0) called
+ack byte: c3

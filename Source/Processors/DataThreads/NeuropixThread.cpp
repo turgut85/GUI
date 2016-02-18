@@ -33,7 +33,6 @@ NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvai
 	if (errorCode == OPEN_SUCCESS)
 	{
 		std::cout << "Open success!" << std::endl;
-		neuropix.neuropix_close();
 	}
 	else {
 		CoreServices::sendStatusMessage("Failure with error code " + String(errorCode));
@@ -76,7 +75,7 @@ NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvai
 
 NeuropixThread::~NeuropixThread()
 {
-	//neuropix_close(); // closes the data and configuration link 
+	neuropix.neuropix_close(); // closes the data and configuration link 
 }
 
 
@@ -91,12 +90,20 @@ bool NeuropixThread::startAcquisition()
 {
 
 	// set into recording mode
-	neuropix.neuropix_mode(ASIC_RECORDING);
+	DigitalControlErrorCode err0 = neuropix.neuropix_mode(ASIC_RECORDING);
+	std::cout << "set mode error code: " << err0 << std::endl;
+	ErrorCode err1 = neuropix.neuropix_datamode(true);
+	std::cout << "set datamode error code: " << err1 << std::endl;
+	ConfigAccessErrorCode err2 = neuropix.neuropix_triggerMode(true);
+	std::cout << "set trigger mode error code: " << err2 << std::endl;
 
 	// clear the neuropix buffer
-    neuropix.neuropix_nrst(false);
-    neuropix.neuropix_resetDatapath();
-    neuropix.neuropix_nrst(true);
+	DigitalControlErrorCode err3 = neuropix.neuropix_nrst(false);
+	std::cout << "nrst 1 error code: " << err3 << std::endl;
+    ErrorCode err4 = neuropix.neuropix_resetDatapath();
+	std::cout << "reset datapath error code: " << err4 << std::endl;
+	DigitalControlErrorCode err5 = neuropix.neuropix_nrst(true);
+	std::cout << "nrst 2 error code: " << err5 << std::endl;
 
 	// clear the internal buffer
 	dataBuffer->clear();
@@ -206,8 +213,8 @@ bool NeuropixThread::updateBuffer()
 
 		for (int i = 0; i < 12; i++)
 		{
-			eventCode = (uint64) packet.synchronization[i];
-			timestamp = (int64) packet.ctrs[i][0];
+			//eventCode = (uint64) packet.synchronization[i];
+			//timestamp = (int64) packet.ctrs[i][0];
 			
 			dataBuffer->addToBuffer(packet.apData[i], &timestamp, &eventCode, 1);
 		}
