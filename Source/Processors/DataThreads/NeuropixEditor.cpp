@@ -108,8 +108,11 @@ void NeuropixEditor::loadEditorParameters(XmlElement* xml)
 
 Visualizer* NeuropixEditor::createNewCanvas(void)
 {
+	std::cout << "Button clicked..." << std::endl;
 	GenericProcessor* processor = (GenericProcessor*) getProcessor();
+	std::cout << "Got processor." << std::endl;
     canvas = new NeuropixCanvas(processor, thread);
+	std::cout << "Created canvas." << std::endl;
     return canvas;
 }
 
@@ -121,7 +124,7 @@ NeuropixCanvas::NeuropixCanvas(GenericProcessor* p, NeuropixThread* thread)
 	processor = (SourceNode*) p;
 
 	neuropixViewport = new Viewport();
-	neuropixInterface = new NeuropixInterface(thread);
+	neuropixInterface = new NeuropixInterface(thread, (NeuropixEditor*) p->getEditor());
 	neuropixViewport->setViewedComponent(neuropixInterface, false);
 	addAndMakeVisible(neuropixViewport);
 
@@ -199,9 +202,16 @@ void NeuropixCanvas::loadVisualizerParameters(XmlElement* xml)
 }
 
 /*****************************************************/
-NeuropixInterface::NeuropixInterface(NeuropixThread* t): thread(t)
+NeuropixInterface::NeuropixInterface(NeuropixThread* t, NeuropixEditor* e) : thread(t), editor(e)
 {
 	cursorType = MouseCursor::NormalCursor;
+
+	String hwVersion;
+	String bsVersion;
+	String apiVersion;
+	String probeType;
+
+	thread->getInfo(hwVersion, bsVersion, apiVersion, probeType);
 
 	isOverZoomRegion = false;
 	isOverUpperBorder = false;
@@ -286,10 +296,20 @@ NeuropixInterface::NeuropixInterface(NeuropixThread* t): thread(t)
 	lfpGainComboBox->setBounds(400, 200, 65, 22);
 	lfpGainComboBox->addListener(this);
 
+	Array<int> gains;
+	gains.add(50);
+	gains.add(125);
+	gains.add(250);
+	gains.add(500);
+	gains.add(1000);
+	gains.add(1500);
+	gains.add(2000);
+	gains.add(2500);
+
 	for (int i = 0; i < 8; i++)
 	{
-		lfpGainComboBox->addItem(String(i), i+1);
-		apGainComboBox->addItem(String(i), i+1);
+		lfpGainComboBox->addItem(String(gains[i]) + String("x"), i + 1);
+		apGainComboBox->addItem(String(gains[i]) + String("x"), i + 1);
 	}
 
 	lfpGainComboBox->setSelectedId(1);
@@ -306,7 +326,7 @@ NeuropixInterface::NeuropixInterface(NeuropixThread* t): thread(t)
 	filterComboBox->addListener(this);
 	filterComboBox->addItem("300 Hz", 1);
 	filterComboBox->addItem("500 Hz", 2);
-	filterComboBox->addItem("1 kHz", 3);
+	filterComboBox->addItem("1 kHz", 4);
 	filterComboBox->setSelectedId(1);
 
 	enableButton = new UtilityButton("ENABLE", Font("Small Text", 13, Font::plain));
@@ -378,6 +398,20 @@ NeuropixInterface::NeuropixInterface(NeuropixThread* t): thread(t)
     addAndMakeVisible(referenceViewButton);
     addAndMakeVisible(annotationButton);
 
+	String labelString = "Hardware version: ";
+	labelString += hwVersion;
+	labelString += "\n\nBasestation version: ";
+	labelString += bsVersion;
+	labelString += "\n\nAPI version: ";
+	labelString += apiVersion;
+	labelString += "\n\nProbe option: ";
+	labelString += probeType;
+	infoLabel = new Label("INFO", labelString);
+	infoLabel->setFont(Font("Small Text", 13, Font::plain));
+	infoLabel->setBounds(550, 10, 300, 250);
+	infoLabel->setColour(Label::textColourId, Colours::grey);
+	addAndMakeVisible(infoLabel);
+
     lfpGainLabel = new Label("LFP GAIN","LFP GAIN");
     lfpGainLabel->setFont(Font("Small Text", 13, Font::plain));
     lfpGainLabel->setBounds(396,180,100,20);
@@ -438,7 +472,15 @@ NeuropixInterface::NeuropixInterface(NeuropixThread* t): thread(t)
 
    	colorSelector = new ColorSelector(this);
    	colorSelector->setBounds(400, 450, 250, 20);
-   	addAndMakeVisible(colorSelector);
+	addAndMakeVisible(colorSelector);
+
+	thread->setAllApGains(0);
+	thread->setAllLfpGains(0);
+	thread->setAllReferences(0);
+	thread->setFilter(0);
+
+	std::cout << "Created Neuropix Interface" << std::endl;
+
 
 }
 
@@ -457,56 +499,76 @@ void NeuropixInterface::labelTextChanged(Label* label)
 
 void NeuropixInterface::comboBoxChanged(ComboBox* comboBox)
 {
-	if (comboBox == apGainComboBox)
+	if (!editor->acquisitionIsActive)
 	{
-		int gainSetting = comboBox->getSelectedId() - 1;
-
-		for (int i = 0; i < 966; i++)
+		if (comboBox == apGainComboBox)
 		{
-			if (channelSelectionState[i] == 1) {
-				channelApGain.set(i, gainSetting);
+			int gainSetting = comboBox->getSelectedId() - 1;
 
-				// inform the thread of the new settings
-				if (channelStatus[i] == 1)
-					thread->setGain(getChannelForElectrode(i), gainSetting, channelLfpGain[i]);
-			}	
+			for (int i = 0; i < 966; i++)
+			{
+				if (channelSelectionState[i] == 1)
+				{
+					channelApGain.set(i, gainSetting);
 
-			
-
+					// 1. set AP gain
+					// inform the thread of the new settings
+					if (channelStatus[i] == 1)
+						thread->setGain(getChannelForElectrode(i), gainSetting, channelLfpGain[i]);
+				}
+			}
 		}
-	} else if (comboBox == lfpGainComboBox)
-	{
-		int gainSetting = comboBox->getSelectedId() - 1;
-
-		for (int i = 0; i < 966; i++)
+		else if (comboBox == lfpGainComboBox)
 		{
-			if (channelSelectionState[i] == 1)
-				channelLfpGain.set(i, gainSetting);
+			int gainSetting = comboBox->getSelectedId() - 1;
 
+			for (int i = 0; i < 966; i++)
+			{
+				if (channelSelectionState[i] == 1)
+				{
+					channelLfpGain.set(i, gainSetting);
+
+					// 2. set lfp gain
+					// inform the thread of the new settings
+					if (channelStatus[i] == 1)
+						thread->setGain(getChannelForElectrode(i), channelApGain[i], gainSetting);
+				}
+
+			}
+		}
+		else if (comboBox == referenceComboBox)
+		{
+			int refSetting = comboBox->getSelectedId() - 1;
+
+			for (int i = 0; i < 966; i++)
+			{
+				if (channelSelectionState[i] == 1)
+				{
+					channelReference.set(i, refSetting);
+
+					// 3. set reference
+					// inform the thread of the new settings
+					if (channelStatus[i] == 1)
+						thread->setReference(getChannelForElectrode(i), refSetting);
+				}
+
+			}
+		}
+		else if (comboBox == filterComboBox)
+		{
 			// inform the thread of the new settings
-			if (channelStatus[i] == 1)
-				thread->setGain(getChannelForElectrode(i), channelApGain[i], gainSetting);
+			int filterSetting = comboBox->getSelectedId() - 1;
 
+			// 0 = 300 Hz
+			// 1 = 500 Hz
+			// 3 = 1 kHz
+
+			thread->setFilter(filterSetting);
 		}
-	} else if (comboBox == referenceComboBox)
-	{
-		int refSetting = comboBox->getSelectedId() - 1;
 
-		for (int i = 0; i < 966; i++)
-		{
-			if (channelSelectionState[i] == 1)
-				channelReference.set(i, refSetting);
-
-			// inform the thread of the new settings
-			if (channelStatus[i] == 1)
-				thread->setReference(getChannelForElectrode(i), refSetting);
-		}
-	} else if (comboBox == filterComboBox)
-	{
-		// inform the thread of the new settings
+		repaint();
 	}
-
-	repaint();
+	
 }
 
 void NeuropixInterface::setAnnotationLabel(String s, Colour c)
@@ -545,76 +607,102 @@ void NeuropixInterface::buttonClicked(Button* button)
 		repaint();
 	} else if (button == enableButton)
 	{
-		for (int i = 0; i < 966; i++)
+		if (!editor->acquisitionIsActive)
 		{
-			if (channelSelectionState[i] == 1) // channel is currently selected
+
+
+			for (int i = 0; i < 966; i++)
 			{
-
-				if (channelStatus[i] != -1) // channel can be turned on
+				if (channelSelectionState[i] == 1) // channel is currently selected
 				{
-					if (channelStatus[i] > -1) // not a reference
-						channelStatus.set(i, 1); // turn channel on
-					else
-						channelStatus.set(i, -2); // turn channel on
 
-					thread->selectElectrode(getChannelForElectrode(i), getConnectionForChannel(i));
-
-					int startPoint;
-					int jump;
-
-					if (option == 3)
+					if (channelStatus[i] != -1) // channel can be turned on
 					{
-						startPoint = -768;
-						jump = 384;
-					} else {
-						startPoint = -828;
-						jump = 276;
-					}
+						if (channelStatus[i] > -1) // not a reference
+							channelStatus.set(i, 1); // turn channel on
+						else
+							channelStatus.set(i, -2); // turn channel on
 
-					for (int j = startPoint; j <= -startPoint; j += jump)
-					{
-						//std::cout << "Checking channel " << j + i << std::endl;
+						// 4. enable electrode
+						thread->selectElectrode(getChannelForElectrode(i), getConnectionForChannel(i));
 
-						int newChan = j + i;
+						int startPoint;
+						int jump;
 
-						if (newChan >= 0 && newChan < 966 && newChan != i)
+						if (option == 3)
 						{
-							//std::cout << "  In range" << std::endl;
+							startPoint = -768;
+							jump = 384;
+						}
+						else {
+							startPoint = -828;
+							jump = 276;
+						}
 
-							if (channelStatus[newChan] != -1)
+						for (int j = startPoint; j <= -startPoint; j += jump)
+						{
+							//std::cout << "Checking channel " << j + i << std::endl;
+
+							int newChan = j + i;
+
+							if (newChan >= 0 && newChan < 966 && newChan != i)
 							{
-								//std::cout << "    Turning off." << std::endl;
-								if (channelStatus[i] > -1) // not a reference
-									channelStatus.set(newChan, 0); // turn connected channel off
-								else
-									channelStatus.set(newChan, -3); // turn connected channel off
+								//std::cout << "  In range" << std::endl;
+
+								if (channelStatus[newChan] != -1)
+								{
+									//std::cout << "    Turning off." << std::endl;
+									if (channelStatus[i] > -1) // not a reference
+										channelStatus.set(newChan, 0); // turn connected channel off
+									else
+										channelStatus.set(newChan, -3); // turn connected channel off
+								}
 							}
 						}
 					}
 				}
 			}
+
+			updateAvailableRefs();
+
+			repaint();
 		}
 
-		updateAvailableRefs();
-
-		repaint();
 	} else if (button == outputOnButton)
 	{
-		for (int i = 0; i < 966; i++)
-		{
-			if (channelSelectionState[i] == 1)
-				channelOutput.set(i, 1);
-		}
 
-		repaint();
+		if (!editor->acquisitionIsActive)
+		{
+
+
+			for (int i = 0; i < 966; i++)
+			{
+				if (channelSelectionState[i] == 1)
+				{
+					channelOutput.set(i, 1);
+					// 5. turn output on
+				}
+
+			}
+
+			repaint();
+		}
 	} else if (button == outputOffButton)
 	{
-		for (int i = 0; i < 966; i++)
+		if (!editor->acquisitionIsActive)
 		{
-			if (channelSelectionState[i] == 1)
-				channelOutput.set(i, 0);
+			for (int i = 0; i < 966; i++)
+			{
+				if (channelSelectionState[i] == 1)
+				{
+					channelOutput.set(i, 0);
+					// 6. turn output off
+				}
+				
+			}
+			repaint();
 		}
-		repaint();
+
 	} else if (button == annotationButton)
 	{
 		//Array<int> a = getSelectedChannels();
@@ -1485,7 +1573,7 @@ int NeuropixInterface::getChannelForElectrode(int ch)
 	{
 		if (ch < 384)
 			return ch;
-		else if (ch >= 384 && ch < 384)
+		else if (ch >= 384 && ch < 768)
 			return ch - 384;
 		else
 			return ch - 384 * 2;
@@ -1508,7 +1596,7 @@ int NeuropixInterface::getConnectionForChannel(int ch)
 	{
 		if (ch < 384)
 			return 0;
-		else if (ch >= 384 && ch < 384)
+		else if (ch >= 384 && ch < 768)
 			return 1;
 		else
 			return 2;
@@ -1580,64 +1668,66 @@ void NeuropixInterface::saveParameters(XmlElement* xml)
 
 void NeuropixInterface::loadParameters(XmlElement* xml)
 {
+	if (0)
+	{
+		String channelStatusValue;
+		String channelReferenceValue;
+		String channelLfpGainValue;
+		String channelApGainValue;
+		String channelSelectionStateValue;
+		String channelOutputValue;
 
-    String channelStatusValue;
-    String channelReferenceValue;
-    String channelLfpGainValue;
-    String channelApGainValue;
-    String channelSelectionStateValue;
-    String channelOutputValue;
+		forEachXmlChildElement(*xml, xmlNode)
+		{
+			if (xmlNode->hasTagName("NEUROPIXELS"))
+			{
+				zoomHeight = xmlNode->getIntAttribute("ZoomHeight");
+				zoomOffset = xmlNode->getIntAttribute("ZoomOffset");
 
-	forEachXmlChildElement(*xml, xmlNode)
-    {
-        if (xmlNode->hasTagName("NEUROPIXELS"))
-        {
-            zoomHeight = xmlNode->getIntAttribute("ZoomHeight");
-			zoomOffset = xmlNode->getIntAttribute("ZoomOffset");
+				channelStatusValue = xmlNode->getStringAttribute("channelStatus");
+				channelReferenceValue = xmlNode->getStringAttribute("channelReference");
+				channelLfpGainValue = xmlNode->getStringAttribute("channeLfpGain");
+				channelApGainValue = xmlNode->getStringAttribute("channelApGain");
+				channelSelectionStateValue = xmlNode->getStringAttribute("channelSelectionState");
+				channelOutputValue = xmlNode->getStringAttribute("channelOutput");
 
-			channelStatusValue = xmlNode->getStringAttribute("channelStatus");
-			channelReferenceValue = xmlNode->getStringAttribute("channelReference");
-			channelLfpGainValue = xmlNode->getStringAttribute("channeLfpGain");
-			channelApGainValue = xmlNode->getStringAttribute("channelApGain");
-			channelSelectionStateValue = xmlNode->getStringAttribute("channelSelectionState");
-			channelOutputValue = xmlNode->getStringAttribute("channelOutput");
+				visualizationMode = xmlNode->getIntAttribute("visualizationMode");
 
-			visualizationMode = xmlNode->getIntAttribute("visualizationMode");
+				filterComboBox->setSelectedId(xmlNode->getIntAttribute("filterCut", 1), sendNotification);
 
-			filterComboBox->setSelectedId(xmlNode->getIntAttribute("filterCut", 1), sendNotification);
+				forEachXmlChildElement(*xmlNode, annotationNode)
+				{
+					if (annotationNode->hasTagName("ANNOTATION"))
+					{
+						Array<int> annotationChannels;
+						annotationChannels.add(annotationNode->getIntAttribute("channel"));
+						annotations.add(Annotation(annotationNode->getStringAttribute("text"),
+							annotationChannels,
+							Colour(annotationNode->getIntAttribute("R"),
+							annotationNode->getIntAttribute("G"),
+							annotationNode->getIntAttribute("B"))));
+					}
+				}
 
-			forEachXmlChildElement(*xmlNode, annotationNode)
-	        {
-	            if (annotationNode->hasTagName("ANNOTATION"))
-	            {
-	            	Array<int> annotationChannels;
-	            	annotationChannels.add(annotationNode->getIntAttribute("channel"));
-	            	annotations.add(Annotation(annotationNode->getStringAttribute("text"),
-	            		            annotationChannels,
-	            		            Colour( annotationNode->getIntAttribute("R"),
-	            		            	    annotationNode->getIntAttribute("G"),
-	            		            	    annotationNode->getIntAttribute("B"))));
-	            }
-	        }
+			}
+		}
 
-        }
-    }
+		if (1)
+		{
+			for (int i = 0; i < 966; i++)
+			{
+				channelStatus.set(i, channelStatusValue.substring(i, i + 1).getHexValue32() - 3);
+				channelReference.set(i, channelReferenceValue.substring(i, i + 1).getHexValue32());
+				channelLfpGain.set(i, channelLfpGainValue.substring(i, i + 1).getHexValue32());
+				channelApGain.set(i, channelApGainValue.substring(i, i + 1).getHexValue32());
+				channelSelectionState.set(i, channelSelectionStateValue.substring(i, i + 1).getHexValue32());
+				channelOutput.set(i, channelOutputValue.substring(i, i + 1).getHexValue32());
 
-    if (1)
-    {
-	    for (int i = 0; i < 966; i++)
-	    {
-	    	channelStatus.set(i,channelStatusValue.substring(i,i+1).getHexValue32() - 3);
-	    	channelReference.set(i,channelReferenceValue.substring(i,i+1).getHexValue32());
-	    	channelLfpGain.set(i,channelLfpGainValue.substring(i,i+1).getHexValue32());
-	    	channelApGain.set(i,channelApGainValue.substring(i,i+1).getHexValue32());
-	    	channelSelectionState.set(i,channelSelectionStateValue.substring(i,i+1).getHexValue32());
-	    	channelOutput.set(i,channelOutputValue.substring(i,i+1).getHexValue32());
+			}
+		}
 
-	    }
+		repaint();
 	}
-
-    repaint();
 
 }
 

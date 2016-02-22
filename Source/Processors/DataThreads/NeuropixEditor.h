@@ -109,7 +109,7 @@ public:
 class NeuropixInterface: public Component, public Button::Listener, public ComboBox::Listener, public Label::Listener
 {
 public:
-	NeuropixInterface(NeuropixThread*);
+	NeuropixInterface(NeuropixThread*, NeuropixEditor*);
 	~NeuropixInterface();
 
 	void setOption(int);
@@ -137,6 +137,7 @@ private:
 	int option;
 
 	NeuropixThread* thread;
+	NeuropixEditor* editor;
 
 	ScopedPointer<ComboBox> lfpGainComboBox;
 	ScopedPointer<ComboBox> apGainComboBox;
@@ -146,6 +147,7 @@ private:
 	ScopedPointer<UtilityButton> enableButton;
 	ScopedPointer<UtilityButton> selectAllButton;
 
+	ScopedPointer<Label> infoLabel;
 	ScopedPointer<Label> lfpGainLabel;
 	ScopedPointer<Label> apGainLabel;
 	ScopedPointer<Label> referenceLabel;

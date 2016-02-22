@@ -45,18 +45,10 @@ NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvai
 	internalTrigger = true;
 
 	// // GET SYSTEM INFO:
-	VersionNumber hw_version;
 	ErrorCode error1 = neuropix.neuropix_getHardwareVersion(&hw_version);
-
-	unsigned char bs_version;
 	ConfigAccessErrorCode error2 = neuropix.neuropix_getBSVersion(bs_version);
-
-	unsigned char bs_revision;
 	ConfigAccessErrorCode error3 = neuropix.neuropix_getBSRevision(bs_revision);
-
-	VersionNumber vn = neuropix.neuropix_getAPIVersion();
-
-	AsicID asicId;
+	vn = neuropix.neuropix_getAPIVersion();
 	EepromErrorCode error4 = neuropix.neuropix_readId(asicId);
 
 	std::cout << "  Hardware version number: " << hw_version.major << "." << hw_version.minor << std::endl;
@@ -71,6 +63,21 @@ NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvai
 	// Option 3 -- select 384 of 960 shank electrodes
 	// Option 4 -- select 276 of 966 shank electrodes
 
+	for (int i = 0; i < 384; i++)
+	{
+		lfpGains.add(0);
+		apGains.add(0);
+	}
+
+	gains.add(50);
+	gains.add(125);
+	gains.add(250);
+	gains.add(500);
+	gains.add(1000);
+	gains.add(1500);
+	gains.add(2000);
+	gains.add(2500);
+
 }
 
 NeuropixThread::~NeuropixThread()
@@ -83,6 +90,14 @@ NeuropixThread::~NeuropixThread()
 bool NeuropixThread::foundInputSource()
 {
 	return baseStationAvailable;
+}
+
+void NeuropixThread::getInfo(String& hwVersion, String& bsVersion, String& apiVersion, String& asicInfo)
+{
+	hwVersion = String(hw_version.major) + "." + String(hw_version.minor);
+	bsVersion = String(bs_version) + "." + String(bs_revision);
+	apiVersion = String(vn.major) + "." + String(vn.minor);
+	asicInfo = String(asicId.probeType);
 }
 
 /** Initializes data transfer.*/
@@ -118,6 +133,8 @@ bool NeuropixThread::startAcquisition()
 			return false;
 		}
 	}
+
+	counter = 0;
 	  
 	startThread();
 
@@ -177,21 +194,59 @@ int NeuropixThread::getNumEventChannels()
 void NeuropixThread::selectElectrode(int chNum, int connection)
 {
 	ShankConfigErrorCode scec = neuropix.neuropix_selectElectrode(chNum, connection);
+
+	std::cout << "Connecting input " << chNum << " to channel " << connection << "; error code = " << scec << std::endl;
 }
 
 void NeuropixThread::setReference(int chNum, int refSetting)
 {
 	BaseConfigErrorCode bcec = neuropix.neuropix_setReference(chNum, refSetting);
+
+	std::cout << "Set channel " << chNum << " reference to " << refSetting << "; error code = " << bcec << std::endl;
+}
+
+void NeuropixThread::setAllReferences(int refSetting)
+{
+	BaseConfigErrorCode bcec = neuropix.neuropix_writeAllReferences((unsigned char) refSetting);
+
+	std::cout << "Set all references to " << refSetting << "; error code = " << bcec << std::endl;
 }
 
 void NeuropixThread::setGain(int chNum, int apGain, int lfpGain)
 {
 	BaseConfigErrorCode bcec = neuropix.neuropix_setGain(chNum, apGain, lfpGain);
+
+	std::cout << "Set channel " << chNum << " gain to " << apGain << " and " << lfpGain << "; error code = " << bcec << std::endl;
+	apGains.set(chNum, apGain);
+	lfpGains.set(chNum, lfpGain);
 }
+
+void NeuropixThread::setAllApGains(int apGain)
+{
+	BaseConfigErrorCode bcec = neuropix.neuropix_writeAllAPGains(apGain);
+
+	std::cout << "Set all AP gains to " << apGain << "; error code = " << bcec << std::endl;
+
+	for (int i = 0; i < 384; i++)
+		apGains.set(i, apGain);
+}
+
+void NeuropixThread::setAllLfpGains(int lfpGain)
+{
+	BaseConfigErrorCode bcec = neuropix.neuropix_writeAllAPGains(lfpGain);
+
+	std::cout << "Set all LFP gains to " << lfpGain << "; error code = " << bcec << std::endl;
+
+	for (int i = 0; i < 384; i++)
+		lfpGains.set(i, lfpGain);
+}
+
 
 void NeuropixThread::setFilter(int filter)
 {
 	BaseConfigErrorCode bcec = neuropix.neuropix_setFilter(filter);
+
+	std::cout << "Set filter to " << filter << "; error code = " << bcec << std::endl;
 }
 
 void NeuropixThread::setTriggerMode(bool trigger)
@@ -214,13 +269,29 @@ bool NeuropixThread::updateBuffer()
 		for (int i = 0; i < 12; i++)
 		{
 			//eventCode = (uint64) packet.synchronization[i];
-			//timestamp = (int64) packet.ctrs[i][0];
+			timestamp = (int64)packet.ctrs[i][0];
+
+
+			//for (int i = 0; i < 384; i++)
+			{
+				//packet.apData[i] -= 0.6; // subtract voltage offset
+				//packet.apData[i] /= gains[apGains[i]]; // divide by gain
+			}
+				
 			
 			dataBuffer->addToBuffer(packet.apData[i], &timestamp, &eventCode, 1);
 		}
 
 		//std::cout << "READ SUCCESS!" << std::endl;
-	
+		counter++;
+
+		if (counter > 5000)
+		{
+			std::cout << timestamp << std::endl;
+		//	std::cout << neuropix.neuropix_fifoFilling() << std::endl;
+			counter = 0;
+		}
+			
 	}
 	else {
 		if (rec == NO_DATA_LINK)

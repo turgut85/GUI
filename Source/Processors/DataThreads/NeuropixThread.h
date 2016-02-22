@@ -57,6 +57,9 @@ public:
     /** Returns true if the data source is connected, false otherwise.*/
     bool foundInputSource();
 
+	/** Returns version info for hardware and API.*/
+	void getInfo(String& hwVersion, String& bsVersion, String& apiVersion, String& asicInfo);
+
     /** Initializes data transfer.*/
     bool startAcquisition();
 
@@ -87,10 +90,19 @@ public:
 	/** Selects which reference is used for each channel. */
 	void setReference(int chNum, int refSetting);
 
+	/** Selects which reference is used for each channel. */
+	void setAllReferences(int refSetting);
+
 	/** Sets the gain for each channel. */
 	void setGain(int ch, int apGain, int lfpGain);
 
-	/** Sets the gain for each channel. */
+	/** Sets the AP gains for all channels. **/
+	void setAllApGains(int apGain);
+
+	/** Sets the LFP gains for all channels. **/
+	void setAllLfpGains(int lfpGain);
+
+	/** Sets the filter for all channels. */
 	void setFilter(int filter);
 
     /** Togglese between internal and external triggering. */
@@ -103,7 +115,18 @@ private:
     bool internalTrigger;
 
 	Neuropix_basestation_api neuropix;
-	//ScopedPointer<ElectrodePacket> packet;
+	
+	long int counter;
+
+	VersionNumber hw_version;
+	unsigned char bs_version;
+	unsigned char bs_revision;
+	VersionNumber vn;
+	AsicID asicId;
+
+	Array<int> gains;
+	Array<int> apGains;
+	Array<int> lfpGains;
 
 };
 
