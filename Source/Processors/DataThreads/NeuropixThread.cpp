@@ -100,11 +100,6 @@ void NeuropixThread::getInfo(String& hwVersion, String& bsVersion, String& apiVe
 /** Initializes data transfer.*/
 bool NeuropixThread::startAcquisition()
 {
-	AsicID asicid;
-	asicid.probeType = 0;
-	asicid.serialNumber = 123;
-	neuropix.neuropix_writeId(asicid);
-
 
 	ConfigAccessErrorCode err2 = neuropix.neuropix_triggerMode(true);
 	std::cout << "set trigger mode error code: " << err2 << std::endl;
@@ -125,7 +120,8 @@ bool NeuropixThread::startAcquisition()
 
 	if (internalTrigger)
 	{
-		ConfigAccessErrorCode caec = neuropix.neuropix_setNeuralStart();
+		//ConfigAccessErrorCode caec = neuropix.neuropix_setNeuralStart();
+		ErrorCode caec = neuropix.neuropix_startRecording();
 
 		if (caec != CONFIG_SUCCESS)
 		{
@@ -153,6 +149,7 @@ bool NeuropixThread::stopAcquisition()
 		signalThreadShouldExit();
 	}
 
+	neuropix.neuropix_stopRecording();
 	neuropix.neuropix_nrst(false);
 
 	return true;
@@ -286,15 +283,16 @@ bool NeuropixThread::updateBuffer()
 		}
 
 		//std::cout << "READ SUCCESS!" << std::endl;
-		counter++;
+		
 
-		if (counter > 5000)
+		if (counter <= 0)
 		{
-			std::cout << packet.apData[0][0] << std::endl;
+			std::cout << timestamp << std::endl;
 		//	std::cout << neuropix.neuropix_fifoFilling() << std::endl;
-			counter = 0;
+			counter = 5000;
 		}
 			
+		counter--;
 	}
 	else {
 		if (rec == NO_DATA_LINK)
