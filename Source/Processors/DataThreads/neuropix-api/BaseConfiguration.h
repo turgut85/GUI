@@ -74,7 +74,7 @@ class BaseConfiguration
 {
 public:
   BaseConfiguration(AsicID * asicid);
-  ~BaseConfiguration();
+  //~BaseConfiguration();
 
   /**
    * This function sets all parameters to the default values.

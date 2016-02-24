@@ -23,9 +23,6 @@
 
 #include "NeuropixThread.h"
 
-#include "neuropix-api/half.hpp"
-
-
 NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvailable(false)
 {
 	OpenErrorCode errorCode = neuropix.neuropix_open(); // establishes a data connection with the basestation
@@ -103,22 +100,25 @@ void NeuropixThread::getInfo(String& hwVersion, String& bsVersion, String& apiVe
 /** Initializes data transfer.*/
 bool NeuropixThread::startAcquisition()
 {
+	AsicID asicid;
+	asicid.probeType = 0;
+	asicid.serialNumber = 123;
+	neuropix.neuropix_writeId(asicid);
 
-	// set into recording mode
-	DigitalControlErrorCode err0 = neuropix.neuropix_mode(ASIC_RECORDING);
-	std::cout << "set mode error code: " << err0 << std::endl;
-	ErrorCode err1 = neuropix.neuropix_datamode(true);
-	std::cout << "set datamode error code: " << err1 << std::endl;
+
 	ConfigAccessErrorCode err2 = neuropix.neuropix_triggerMode(true);
 	std::cout << "set trigger mode error code: " << err2 << std::endl;
 
-	// clear the neuropix buffer
+	// set into recording mode
+	ErrorCode err1 = neuropix.neuropix_datamode(true);
+	std::cout << "set datamode error code: " << err1 << std::endl;
+	DigitalControlErrorCode err0 = neuropix.neuropix_mode(ASIC_RECORDING);
+	std::cout << "set mode error code: " << err0 << std::endl;
 	DigitalControlErrorCode err3 = neuropix.neuropix_nrst(false);
 	std::cout << "nrst 1 error code: " << err3 << std::endl;
-    ErrorCode err4 = neuropix.neuropix_resetDatapath();
+	ErrorCode err4 = neuropix.neuropix_resetDatapath();
 	std::cout << "reset datapath error code: " << err4 << std::endl;
-	DigitalControlErrorCode err5 = neuropix.neuropix_nrst(true);
-	std::cout << "nrst 2 error code: " << err5 << std::endl;
+
 
 	// clear the internal buffer
 	dataBuffer->clear();
@@ -133,6 +133,9 @@ bool NeuropixThread::startAcquisition()
 			return false;
 		}
 	}
+
+	DigitalControlErrorCode err5 = neuropix.neuropix_nrst(true);
+	std::cout << "nrst 2 error code: " << err5 << std::endl;
 
 	counter = 0;
 	  
@@ -287,7 +290,7 @@ bool NeuropixThread::updateBuffer()
 
 		if (counter > 5000)
 		{
-			std::cout << timestamp << std::endl;
+			std::cout << packet.apData[0][0] << std::endl;
 		//	std::cout << neuropix.neuropix_fifoFilling() << std::endl;
 			counter = 0;
 		}
