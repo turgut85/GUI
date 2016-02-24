@@ -62,11 +62,14 @@ private:
     ScopedPointer<ComboBox> optionComboBox;
     ScopedPointer<UtilityButton> triggerTypeButton;
     ScopedPointer<Label> triggerTypeLabel;
+	ScopedPointer<UtilityButton> recordButton;
+	ScopedPointer<Label> recordLabel;
     Viewport* viewport;
     NeuropixCanvas* canvas;
     NeuropixThread* thread;
 
     bool internalTrigger;
+	bool recordToNpx;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NeuropixEditor);
 

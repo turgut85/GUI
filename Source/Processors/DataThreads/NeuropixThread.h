@@ -105,18 +105,23 @@ public:
 	/** Sets the filter for all channels. */
 	void setFilter(int filter);
 
-    /** Togglese between internal and external triggering. */
+    /** Toggles between internal and external triggering. */
     void setTriggerMode(bool trigger);
+
+	/** Toggles between saving to NPX file. */
+	void setRecordMode(bool record);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NeuropixThread);
 
 private:
     bool baseStationAvailable;
     bool internalTrigger;
+	bool recordToNpx;
 
 	Neuropix_basestation_api neuropix;
 	
 	long int counter;
+	int recordingNumber;
 
 	VersionNumber hw_version;
 	unsigned char bs_version;

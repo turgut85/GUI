@@ -31,7 +31,7 @@ NeuropixEditor::NeuropixEditor(GenericProcessor* parentNode, NeuropixThread* t, 
 	tabText = "Neuropix";
 
 	optionComboBox = new ComboBox("Option Combo Box");
-	optionComboBox->setBounds(20,50,100,25);
+	optionComboBox->setBounds(20,35,100,25);
 	optionComboBox->addListener(this);
 
 	for (int k = 1; k < 5; k++)
@@ -43,7 +43,7 @@ NeuropixEditor::NeuropixEditor(GenericProcessor* parentNode, NeuropixThread* t, 
 
 	triggerTypeButton = new UtilityButton("INTERNAL", Font("Small Text", 13, Font::plain));
     triggerTypeButton->setRadius(3.0f);
-    triggerTypeButton->setBounds(20,90,85,22);
+    triggerTypeButton->setBounds(20,70,85,22);
     triggerTypeButton->addListener(this);
     triggerTypeButton->setTooltip("Switch between external and internal triggering");
     triggerTypeButton->setToggleState(true, dontSendNotification);
@@ -53,9 +53,25 @@ NeuropixEditor::NeuropixEditor(GenericProcessor* parentNode, NeuropixThread* t, 
 
     triggerTypeLabel = new Label("Trigger", "Trigger");
     triggerTypeLabel->setFont(Font("Small Text", 13, Font::plain));
-    triggerTypeLabel->setBounds(105,91,100,20);
+    triggerTypeLabel->setBounds(105,71,100,20);
     triggerTypeLabel->setColour(Label::textColourId, Colours::darkgrey);
     addAndMakeVisible(triggerTypeLabel);
+
+	recordButton = new UtilityButton("YES", Font("Small Text", 13, Font::plain));
+	recordButton->setRadius(3.0f);
+	recordButton->setBounds(20, 100, 34, 22);
+	recordButton->addListener(this);
+	recordButton->setTooltip("Switch between external and internal triggering");
+	recordButton->setToggleState(true, dontSendNotification);
+	addAndMakeVisible(recordButton);
+
+	recordToNpx = true;
+
+	recordLabel = new Label("Record to NPX", "Record to NPX");
+	recordLabel->setFont(Font("Small Text", 13, Font::plain));
+	recordLabel->setBounds(55, 101, 200, 20);
+	recordLabel->setColour(Label::textColourId, Colours::darkgrey);
+	addAndMakeVisible(recordLabel);
 
 	thread = t;
 }
@@ -77,21 +93,44 @@ void NeuropixEditor::comboBoxChanged(ComboBox* comboBox)
 
 void NeuropixEditor::buttonCallback(Button* button)
 {
-	if (button == triggerTypeButton)
+	if (!acquisitionIsActive)
 	{
-		internalTrigger = !internalTrigger;
-
-		if (internalTrigger)
+	
+		if (button == triggerTypeButton)
 		{
-			triggerTypeButton->setLabel("INTERNAL");
-			triggerTypeButton->setToggleState(true, dontSendNotification);
-		} else {
-			triggerTypeButton->setLabel("EXTERNAL");
-			triggerTypeButton->setToggleState(false, dontSendNotification);
-		}
+			internalTrigger = !internalTrigger;
 
-		thread->setTriggerMode(internalTrigger);
+			if (internalTrigger)
+			{
+				triggerTypeButton->setLabel("INTERNAL");
+				triggerTypeButton->setToggleState(true, dontSendNotification);
+			} else {
+				triggerTypeButton->setLabel("EXTERNAL");
+				triggerTypeButton->setToggleState(false, dontSendNotification);
+			}
+
+			thread->setTriggerMode(internalTrigger);
 		
+		}
+		else if (button == recordButton)
+		{
+			recordToNpx = !recordToNpx;
+
+			if (recordToNpx)
+			{
+				recordButton->setLabel("YES");
+				recordButton->setToggleState(true, dontSendNotification);
+			}
+			else {
+				recordButton->setLabel("NO");
+				recordButton->setToggleState(false, dontSendNotification);
+			}
+
+			thread->setRecordMode(recordToNpx);
+		}
+	}
+	else {
+		CoreServices::sendStatusMessage("Cannot update parameters while acquisition is active.");
 	}
 }
 
@@ -505,34 +544,38 @@ void NeuropixInterface::comboBoxChanged(ComboBox* comboBox)
 		{
 			int gainSetting = comboBox->getSelectedId() - 1;
 
+			thread->setAllApGains(gainSetting);
+
 			for (int i = 0; i < 966; i++)
 			{
-				if (channelSelectionState[i] == 1)
-				{
+			//	if (channelSelectionState[i] == 1)
+			//	{
 					channelApGain.set(i, gainSetting);
 
-					// 1. set AP gain
-					// inform the thread of the new settings
-					if (channelStatus[i] == 1)
-						thread->setGain(getChannelForElectrode(i), gainSetting, channelLfpGain[i]);
-				}
+			//		// 1. set AP gain for individual channels
+			//		// inform the thread of the new settings
+			//		if (channelStatus[i] == 1)
+			//			thread->setGain(getChannelForElectrode(i), gainSetting, channelLfpGain[i]);
+			//	}
 			}
 		}
 		else if (comboBox == lfpGainComboBox)
 		{
 			int gainSetting = comboBox->getSelectedId() - 1;
 
+			thread->setAllLfpGains(gainSetting);
+
 			for (int i = 0; i < 966; i++)
 			{
-				if (channelSelectionState[i] == 1)
-				{
+			//	if (channelSelectionState[i] == 1)
+			//	{
 					channelLfpGain.set(i, gainSetting);
 
-					// 2. set lfp gain
-					// inform the thread of the new settings
-					if (channelStatus[i] == 1)
-						thread->setGain(getChannelForElectrode(i), channelApGain[i], gainSetting);
-				}
+			//		// 2. set lfp gain for individual channels
+			//		// inform the thread of the new settings
+			//		if (channelStatus[i] == 1)
+			//			thread->setGain(getChannelForElectrode(i), channelApGain[i], gainSetting);
+			//	}
 
 			}
 		}
@@ -540,17 +583,19 @@ void NeuropixInterface::comboBoxChanged(ComboBox* comboBox)
 		{
 			int refSetting = comboBox->getSelectedId() - 1;
 
+			thread->setAllReferences(refSetting);
+
 			for (int i = 0; i < 966; i++)
 			{
-				if (channelSelectionState[i] == 1)
-				{
+			//	if (channelSelectionState[i] == 1)
+			//	{
 					channelReference.set(i, refSetting);
 
-					// 3. set reference
-					// inform the thread of the new settings
-					if (channelStatus[i] == 1)
-						thread->setReference(getChannelForElectrode(i), refSetting);
-				}
+			//		// 3. set reference for individual channels
+			//		// inform the thread of the new settings
+			//		if (channelStatus[i] == 1)
+			//			thread->setReference(getChannelForElectrode(i), refSetting);
+			//	}
 
 			}
 		}
@@ -567,6 +612,9 @@ void NeuropixInterface::comboBoxChanged(ComboBox* comboBox)
 		}
 
 		repaint();
+	} 
+     else {
+		 CoreServices::sendStatusMessage("Cannot update parameters while acquisition is active");// no parameter change while acquisition is active
 	}
 	
 }

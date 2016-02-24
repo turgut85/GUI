@@ -40,6 +40,8 @@ NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvai
 
 	baseStationAvailable = true;
 	internalTrigger = true;
+	recordToNpx = true;
+	recordingNumber = 0;
 
 	// // GET SYSTEM INFO:
 	ErrorCode error1 = neuropix.neuropix_getHardwareVersion(&hw_version);
@@ -101,9 +103,6 @@ void NeuropixThread::getInfo(String& hwVersion, String& bsVersion, String& apiVe
 bool NeuropixThread::startAcquisition()
 {
 
-	ConfigAccessErrorCode err2 = neuropix.neuropix_triggerMode(true);
-	std::cout << "set trigger mode error code: " << err2 << std::endl;
-
 	// set into recording mode
 	ErrorCode err1 = neuropix.neuropix_datamode(true);
 	std::cout << "set datamode error code: " << err1 << std::endl;
@@ -120,14 +119,26 @@ bool NeuropixThread::startAcquisition()
 
 	if (internalTrigger)
 	{
-		//ConfigAccessErrorCode caec = neuropix.neuropix_setNeuralStart();
-		ErrorCode caec = neuropix.neuropix_startRecording();
 
-		if (caec != CONFIG_SUCCESS)
+		if (recordToNpx)
 		{
-			std::cout << "start failed with error code " << caec << std::endl;
-			return false;
+			recordingNumber++;
+			std::string filename = "recording";
+			filename += recordingNumber;
+			filename += ".npx";
+			ErrorCode caec = neuropix.neuropix_startRecording(filename);
 		}
+		else
+		{
+			ConfigAccessErrorCode caec = neuropix.neuropix_setNeuralStart();
+		}
+			
+
+		//if (caec != CONFIG_SUCCESS)
+		//{
+		//	std::cout << "start failed with error code " << caec << std::endl;
+		//	return false;
+		//}
 	}
 
 	DigitalControlErrorCode err5 = neuropix.neuropix_nrst(true);
@@ -149,7 +160,9 @@ bool NeuropixThread::stopAcquisition()
 		signalThreadShouldExit();
 	}
 
-	neuropix.neuropix_stopRecording();
+	if (recordToNpx)
+		neuropix.neuropix_stopRecording();
+
 	neuropix.neuropix_nrst(false);
 
 	return true;
@@ -252,6 +265,13 @@ void NeuropixThread::setFilter(int filter)
 void NeuropixThread::setTriggerMode(bool trigger)
 {
 	ConfigAccessErrorCode caec = neuropix.neuropix_triggerMode(trigger);
+	
+	internalTrigger = trigger;
+}
+
+void NeuropixThread::setRecordMode(bool record)
+{
+	recordToNpx = record;
 }
 
 bool NeuropixThread::updateBuffer()
