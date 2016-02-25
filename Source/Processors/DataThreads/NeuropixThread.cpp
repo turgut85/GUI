@@ -112,6 +112,11 @@ void NeuropixThread::getInfo(String& hwVersion, String& bsVersion, String& apiVe
 /** Initializes data transfer.*/
 bool NeuropixThread::startAcquisition()
 {
+
+	// clear the internal buffer
+	dataBuffer->clear();
+
+
 	// prepare probe for streaming data
 	ErrorCode err1 = neuropix.neuropix_datamode(true);
 	std::cout << "set datamode error code: " << err1 << std::endl;
@@ -124,10 +129,8 @@ bool NeuropixThread::startAcquisition()
 	DigitalControlErrorCode err5 = neuropix.neuropix_nrst(true);
 	std::cout << "nrst 2 error code: " << err5 << std::endl;
 
-	// clear the internal buffer
-	dataBuffer->clear();
 
-	if (internalTrigger) // try without starting/recording
+	if (internalTrigger)
 	{
 
 		if (recordToNpx)
@@ -136,15 +139,16 @@ bool NeuropixThread::startAcquisition()
 			std::string filename = "recording";
 			filename += std::to_string(recordingNumber);
 			filename += ".npx";
-			//ErrorCode caec = neuropix.neuropix_startRecording(filename);
-			//std::cout << "Recording to file: " << filename << std::endl;
+			const std::string fname = filename;
+			ErrorCode caec = neuropix.neuropix_startRecording(fname);
+			std::cout << "Recording to file: " << filename << std::endl;
 		}
-		else
-		{
-			ConfigAccessErrorCode caec = neuropix.neuropix_setNeuralStart();
-		}
-			
 
+		// // setNeuralStart() doesn't work yet!
+		//else
+		//{
+		//	ConfigAccessErrorCode caec = neuropix.neuropix_setNeuralStart();
+		//}
 		//if (caec != CONFIG_SUCCESS)
 		//{
 		//	std::cout << "start failed with error code " << caec << std::endl;
@@ -168,8 +172,8 @@ bool NeuropixThread::stopAcquisition()
 		signalThreadShouldExit();
 	}
 
-	//if (recordToNpx)
-	//	neuropix.neuropix_stopRecording();
+	if (recordToNpx)
+		neuropix.neuropix_stopRecording();
 
 	//neuropix.neuropix_nrst(false);
 
@@ -284,6 +288,15 @@ void NeuropixThread::setRecordMode(bool record)
 	recordToNpx = record;
 }
 
+
+void NeuropixThread::loadGainSettings()
+{
+
+	EepromErrorCode eec = neuropix.neuropix_readGainCorrection();
+
+	std::cout << "Gain correction error code: " << eec << std::endl;
+}
+
 bool NeuropixThread::updateBuffer()
 {
 
@@ -300,7 +313,7 @@ bool NeuropixThread::updateBuffer()
 
 		if (counter <= 0)
 		{
-			std::cout << packet.apData[0][0] << std::endl;
+			std::cout << counter << ": " << packet.apData[0][0] << std::endl;
 			//	std::cout << timestamp << std::endl;
 			//	std::cout << neuropix.neuropix_fifoFilling() << std::endl;
 			counter = 5000;
@@ -316,12 +329,9 @@ bool NeuropixThread::updateBuffer()
 
 			for (int j = 0; j < 384; j++)
 			{
-				data[j] = (packet.apData[i][j] - 0.6) / gains[apGains[j]] * 1000000;
-				//packet.apData[i] -= 0.6; // subtract voltage offset
-				//packet.apData[i] /= gains[apGains[i]]; // divide by gain
+				data[j] = (packet.apData[i][j] - 0.6) / gains[apGains[j]] * 1000000.0f; // convert to microvolts
 			}
 				
-			
 			dataBuffer->addToBuffer(data, &timestamp, &eventCode, 1);
 		}
 

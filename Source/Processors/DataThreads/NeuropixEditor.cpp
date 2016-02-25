@@ -422,6 +422,12 @@ NeuropixInterface::NeuropixInterface(NeuropixThread* t, NeuropixEditor* e) : thr
     annotationButton->addListener(this);
     annotationButton->setTooltip("Add annotation to selected channels");
 
+	calibrationButton = new UtilityButton("CALIBRATE", Font("Small Text", 12, Font::plain));
+	calibrationButton->setRadius(3.0f);
+	calibrationButton->setBounds(400, 520, 90, 24);
+	calibrationButton->addListener(this);
+	calibrationButton->setTooltip("Load gain calibration settings");
+
     addAndMakeVisible(lfpGainComboBox);
     addAndMakeVisible(apGainComboBox);
     addAndMakeVisible(referenceComboBox);
@@ -436,6 +442,7 @@ NeuropixInterface::NeuropixInterface(NeuropixThread* t, NeuropixEditor* e) : thr
     addAndMakeVisible(apGainViewButton);
     addAndMakeVisible(referenceViewButton);
     addAndMakeVisible(annotationButton);
+	addAndMakeVisible(calibrationButton);
 
 	String labelString = "Hardware version: ";
 	labelString += hwVersion;
@@ -764,6 +771,15 @@ void NeuropixInterface::buttonClicked(Button* button)
 			annotations.add(Annotation(s, a, colorSelector->getCurrentColour()));
 
 		repaint();
+	}
+	else if (button == calibrationButton)
+	{
+		if (!editor->acquisitionIsActive)
+		{
+			std::cout << "Loading gain setting..." << std::endl;
+			thread->loadGainSettings();
+			std::cout << "Gain settings loaded." << std::endl;
+		}
 	}
 	
 }

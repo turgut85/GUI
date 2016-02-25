@@ -111,6 +111,9 @@ public:
 	/** Toggles between saving to NPX file. */
 	void setRecordMode(bool record);
 
+	/** Loads gain calibration settings stored on EEPROM. */
+	void loadGainSettings();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NeuropixThread);
 
 private:
