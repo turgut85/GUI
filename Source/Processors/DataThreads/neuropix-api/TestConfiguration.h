@@ -13,7 +13,7 @@ class TestConfiguration
 {
 public:
   TestConfiguration();
-  //~TestConfiguration();
+  ~TestConfiguration();
 
   /**
    * This function sets all members to their default values.

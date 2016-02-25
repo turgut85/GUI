@@ -25,6 +25,40 @@
 
 NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvailable(false)
 {
+
+	dataBuffer = new DataBuffer(384, 10000); // start with 384 channels and automatically resize
+
+	// channel selections:
+	// Options 1 & 2 -- fixed 384 channels
+	// Option 3 -- select 384 of 960 shank electrodes
+	// Option 4 -- select 276 of 966 shank electrodes
+
+	for (int i = 0; i < 384; i++)
+	{
+		lfpGains.add(0);
+		apGains.add(0);
+	}
+
+	gains.add(50);
+	gains.add(125);
+	gains.add(250);
+	gains.add(500);
+	gains.add(1000);
+	gains.add(1500);
+	gains.add(2000);
+	gains.add(2500);
+
+	openConnection();
+
+}
+
+NeuropixThread::~NeuropixThread()
+{
+	closeConnection();
+}
+
+void NeuropixThread::openConnection()
+{
 	OpenErrorCode errorCode = neuropix.neuropix_open(); // establishes a data connection with the basestation
 
 	if (errorCode == OPEN_SUCCESS)
@@ -54,36 +88,12 @@ NeuropixThread::NeuropixThread(SourceNode* sn) : DataThread(sn), baseStationAvai
 	std::cout << "  Basestation version number: " << String(bs_version) << "." << String(bs_revision) << std::endl;
 	std::cout << "  API version number: " << vn.major << "." << vn.minor << std::endl;
 	std::cout << "  Asic info: " << asicId.probeType << std::endl;
-
-	dataBuffer = new DataBuffer(384, 10000); // start with 384 channels and automatically resize
-
-	// channel selections:
-	// Options 1 & 2 -- fixed 384 channels
-	// Option 3 -- select 384 of 960 shank electrodes
-	// Option 4 -- select 276 of 966 shank electrodes
-
-	for (int i = 0; i < 384; i++)
-	{
-		lfpGains.add(0);
-		apGains.add(0);
-	}
-
-	gains.add(50);
-	gains.add(125);
-	gains.add(250);
-	gains.add(500);
-	gains.add(1000);
-	gains.add(1500);
-	gains.add(2000);
-	gains.add(2500);
-
 }
 
-NeuropixThread::~NeuropixThread()
+void NeuropixThread::closeConnection()
 {
 	neuropix.neuropix_close(); // closes the data and configuration link 
 }
-
 
 /** Returns true if the data source is connected, false otherwise.*/
 bool NeuropixThread::foundInputSource()
@@ -102,8 +112,7 @@ void NeuropixThread::getInfo(String& hwVersion, String& bsVersion, String& apiVe
 /** Initializes data transfer.*/
 bool NeuropixThread::startAcquisition()
 {
-
-	// set into recording mode
+	// prepare probe for streaming data
 	ErrorCode err1 = neuropix.neuropix_datamode(true);
 	std::cout << "set datamode error code: " << err1 << std::endl;
 	DigitalControlErrorCode err0 = neuropix.neuropix_mode(ASIC_RECORDING);
@@ -112,21 +121,23 @@ bool NeuropixThread::startAcquisition()
 	std::cout << "nrst 1 error code: " << err3 << std::endl;
 	ErrorCode err4 = neuropix.neuropix_resetDatapath();
 	std::cout << "reset datapath error code: " << err4 << std::endl;
-
+	DigitalControlErrorCode err5 = neuropix.neuropix_nrst(true);
+	std::cout << "nrst 2 error code: " << err5 << std::endl;
 
 	// clear the internal buffer
 	dataBuffer->clear();
 
-	if (internalTrigger)
+	if (internalTrigger) // try without starting/recording
 	{
 
 		if (recordToNpx)
 		{
 			recordingNumber++;
 			std::string filename = "recording";
-			filename += recordingNumber;
+			filename += std::to_string(recordingNumber);
 			filename += ".npx";
-			ErrorCode caec = neuropix.neuropix_startRecording(filename);
+			//ErrorCode caec = neuropix.neuropix_startRecording(filename);
+			//std::cout << "Recording to file: " << filename << std::endl;
 		}
 		else
 		{
@@ -140,9 +151,6 @@ bool NeuropixThread::startAcquisition()
 		//	return false;
 		//}
 	}
-
-	DigitalControlErrorCode err5 = neuropix.neuropix_nrst(true);
-	std::cout << "nrst 2 error code: " << err5 << std::endl;
 
 	counter = 0;
 	  
@@ -160,10 +168,12 @@ bool NeuropixThread::stopAcquisition()
 		signalThreadShouldExit();
 	}
 
-	if (recordToNpx)
-		neuropix.neuropix_stopRecording();
+	//if (recordToNpx)
+	//	neuropix.neuropix_stopRecording();
 
-	neuropix.neuropix_nrst(false);
+	//neuropix.neuropix_nrst(false);
+
+	//closeConnection(); // closes the data and configuration link 
 
 	return true;
 }
@@ -195,7 +205,7 @@ float NeuropixThread::getSampleRate()
 /** Returns the volts per bit of the data source.*/
 float NeuropixThread::getBitVolts(Channel* chan)
 {
-	return 10.0;
+	return 0.195f;
 }
 
 /** Returns the number of event channels of the data source.*/
@@ -286,33 +296,37 @@ bool NeuropixThread::updateBuffer()
 		int64 timestamp = 0;
 		uint64 eventCode = 0;
 
+		float data[384];
+
+		if (counter <= 0)
+		{
+			std::cout << packet.apData[0][0] << std::endl;
+			//	std::cout << timestamp << std::endl;
+			//	std::cout << neuropix.neuropix_fifoFilling() << std::endl;
+			counter = 5000;
+		}
+
+		counter--;
+
 		for (int i = 0; i < 12; i++)
 		{
 			//eventCode = (uint64) packet.synchronization[i];
 			timestamp = (int64)packet.ctrs[i][0];
 
 
-			//for (int i = 0; i < 384; i++)
+			for (int j = 0; j < 384; j++)
 			{
+				data[j] = (packet.apData[i][j] - 0.6) / gains[apGains[j]] * 1000000;
 				//packet.apData[i] -= 0.6; // subtract voltage offset
 				//packet.apData[i] /= gains[apGains[i]]; // divide by gain
 			}
 				
 			
-			dataBuffer->addToBuffer(packet.apData[i], &timestamp, &eventCode, 1);
+			dataBuffer->addToBuffer(data, &timestamp, &eventCode, 1);
 		}
 
-		//std::cout << "READ SUCCESS!" << std::endl;
+		//std::cout << "READ SUCCESS!" << std::endl;	
 		
-
-		if (counter <= 0)
-		{
-			std::cout << timestamp << std::endl;
-		//	std::cout << neuropix.neuropix_fifoFilling() << std::endl;
-			counter = 5000;
-		}
-			
-		counter--;
 	}
 	else {
 		if (rec == NO_DATA_LINK)

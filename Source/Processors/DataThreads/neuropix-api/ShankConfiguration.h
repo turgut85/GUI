@@ -38,7 +38,7 @@ class ShankConfiguration
 {
 public:
   ShankConfiguration(AsicID * asicid);
-  //~ShankConfiguration();
+  ~ShankConfiguration();
 
   /**
    * This function sets all members to their default values.

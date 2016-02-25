@@ -133,6 +133,9 @@ private:
 	Array<int> apGains;
 	Array<int> lfpGains;
 
+	void openConnection();
+	void closeConnection();
+
 };
 
 #endif  // NEUROPIXTHREAD_H_INCLUDED
