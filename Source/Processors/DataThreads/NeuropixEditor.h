@@ -227,6 +227,7 @@ private:
 	int getChannelForElectrode(int);
 	int getConnectionForChannel(int);
 
+	void resetParameters();
 };
 
 class Annotation

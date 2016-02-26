@@ -520,18 +520,28 @@ NeuropixInterface::NeuropixInterface(NeuropixThread* t, NeuropixEditor* e) : thr
    	colorSelector->setBounds(400, 450, 250, 20);
 	addAndMakeVisible(colorSelector);
 
-	thread->setAllApGains(0);
-	thread->setAllLfpGains(0);
-	thread->setAllReferences(0);
-	thread->setFilter(0);
-
 	std::cout << "Created Neuropix Interface" << std::endl;
 
+	resetParameters();
 
 }
 
 NeuropixInterface::~NeuropixInterface()
 {
+
+}
+
+void NeuropixInterface::resetParameters()
+{
+	thread->setAllApGains(0);
+	thread->setAllLfpGains(0);
+	thread->setAllReferences(0);
+	thread->setFilter(0);
+
+	lfpGainComboBox->setSelectedId(1);
+	apGainComboBox->setSelectedId(1);
+	referenceComboBox->setSelectedId(1);
+	filterComboBox->setSelectedId(1);
 
 }
 
@@ -1013,13 +1023,13 @@ String NeuropixInterface::getChannelInfoString(int chan)
 		a += "NO";
 
 	a += "\nAP Gain: ";
-	a += String(channelApGain[chan]);
+	a += String(apGainComboBox->getItemText(channelApGain[chan]));
 
 	a += "\nLFP Gain: ";
-	a += String(channelLfpGain[chan]);
+	a += String(lfpGainComboBox->getItemText(channelLfpGain[chan]));
 
 	a += "\nReference: ";
-	a += String(channelReference[chan]);
+	a += String(referenceComboBox->getItemText(channelReference[chan]));
 
 	return a;
 }
