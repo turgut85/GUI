@@ -78,6 +78,9 @@ ChannelSelector::ChannelSelector(bool createButtons, Font& titleFont_) :
     addAndMakeVisible(channelSelectorRegion);
     channelSelectorRegion->toBack();
 
+	numColumnsLessThan100 = 8;
+	numColumnsGreaterThan100 = 6;
+
 }
 
 ChannelSelector::~ChannelSelector()
@@ -158,10 +161,10 @@ void ChannelSelector::shiftChannelsVertical(float amount)
     {
         offsetUD -= amount*10;
         offsetUD = jmin(offsetUD, 0.0f);
-        offsetUD = jmax(offsetUD, float(parameterButtons.size())/8*-10.68f);
+        offsetUD = jmax(offsetUD, (float) -overallHeight);
     }
 
-    //std::cout << "offsetUD = " << offsetUD << std::endl;
+    std::cout << "offsetUD = " << offsetUD << std::endl;
 
     refreshButtonBoundaries();
 
@@ -172,30 +175,40 @@ void ChannelSelector::refreshButtonBoundaries()
 
     channelSelectorRegion->setBounds(0,20,getWidth(),getHeight()-35);
 
-    int nColumns = 8;
-    int columnWidth = getDesiredWidth()/(nColumns + 1);
     int rowHeight = 14;
+	int column = 0;
+	int row = 0;
+	int nColumns;
 
     for (int i = 0; i < parameterButtons.size(); i++)
     {
 
-        parameterButtons[i]->setBounds(columnWidth/2 + offsetLR +
-                                       columnWidth*((i)%nColumns),
-                                       floor(double(i)/nColumns)*rowHeight+(int) offsetUD,
-                                       columnWidth, rowHeight);
+		if (i < 96)
+			nColumns = numColumnsLessThan100;
+		else
+			nColumns = numColumnsGreaterThan100;
+
+		int columnWidth = getDesiredWidth() / (nColumns + 1) + 1;
+
+		int xLoc = columnWidth / 2 + offsetLR + columnWidth*column;
+		int yLoc = row * rowHeight + offsetUD;
+
+        parameterButtons[i]->setBounds(xLoc, yLoc, columnWidth, rowHeight);
 
         if (isNotSink)
         {
-            recordButtons[i]->setBounds(columnWidth/2 + offsetLR +
-                                        columnWidth*((i)%nColumns) - getDesiredWidth(),
-                                        floor(double(i)/nColumns)*rowHeight+(int) offsetUD,
-                                        columnWidth, rowHeight);
-            audioButtons[i]->setBounds(columnWidth/2 + offsetLR +
-                                       columnWidth*((i)%nColumns) -
-                                       getDesiredWidth()*2,
-                                       floor(double(i)/nColumns)*rowHeight+(int) offsetUD,
-                                       columnWidth, rowHeight);
+			recordButtons[i]->setBounds(xLoc - getDesiredWidth(), yLoc, columnWidth, rowHeight);
+			audioButtons[i]->setBounds(xLoc - getDesiredWidth()*2, yLoc, columnWidth, rowHeight);
         }
+
+		column++;
+
+		if (column >= nColumns)
+		{
+			column = 0;
+			row++;
+			overallHeight = row * rowHeight;
+		}
 
     }
 

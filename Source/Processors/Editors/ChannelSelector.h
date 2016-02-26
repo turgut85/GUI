@@ -164,6 +164,10 @@ private:
     int offsetLR;
     float offsetUD;
 
+	int numColumnsLessThan100;
+	int numColumnsGreaterThan100;
+	int overallHeight;
+
     int parameterOffset;
     int audioOffset;
     int recordOffset;
