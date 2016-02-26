@@ -164,6 +164,16 @@ void VisualizerEditor::buttonEvent(Button* button)
 
     int gId = button->getRadioGroupId();
 
+	if (button == drawerButton)
+	{
+		std::cout << "Drawer button clicked" << std::endl;
+		windowSelector->setBounds(desiredWidth - 40, 7, 14, 10);
+		tabSelector->setBounds(desiredWidth - 20, 7, 15, 10);
+
+		return;
+
+	}
+
     if (gId > 0)
     {
         if (canvas != nullptr)
@@ -175,18 +185,18 @@ void VisualizerEditor::buttonEvent(Button* button)
     else
     {
 
-        if (canvas == nullptr)
-        {
-
-            canvas = createNewCanvas();
-            canvas->update();
-
-            if (isPlaying)
-                canvas->beginAnimation();
-        }
-
         if (button == windowSelector)
         {
+
+			if (canvas == nullptr)
+			{
+
+				canvas = createNewCanvas();
+				canvas->update();
+
+				if (isPlaying)
+					canvas->beginAnimation();
+			}
 
             if (tabSelector->getToggleState() && windowSelector->getToggleState())
             {
@@ -225,6 +235,17 @@ void VisualizerEditor::buttonEvent(Button* button)
         }
         else if (button == tabSelector)
         {
+
+			if (canvas == nullptr)
+			{
+
+				canvas = createNewCanvas();
+				canvas->update();
+
+				if (isPlaying)
+					canvas->beginAnimation();
+			}
+
             if (tabSelector->getToggleState() && tabIndex < 0)
             {
 
@@ -250,14 +271,6 @@ void VisualizerEditor::buttonEvent(Button* button)
     }
 
     buttonCallback(button);
-
-    if (button == drawerButton)
-    {
-        std::cout<<"Drawer button clicked"<<std::endl;
-        windowSelector->setBounds(desiredWidth - 40,7,14,10);
-        tabSelector->setBounds(desiredWidth - 20,7,15,10);
-
-    }
 
 }
 
