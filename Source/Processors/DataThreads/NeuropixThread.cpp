@@ -88,6 +88,16 @@ void NeuropixThread::openConnection()
 	std::cout << "  Basestation version number: " << String(bs_version) << "." << String(bs_revision) << std::endl;
 	std::cout << "  API version number: " << vn.major << "." << vn.minor << std::endl;
 	std::cout << "  Asic info: " << asicId.probeType << std::endl;
+
+	// prepare probe for streaming data
+	ErrorCode err1 = neuropix.neuropix_datamode(true);
+	std::cout << "set datamode error code: " << err1 << std::endl;
+	DigitalControlErrorCode err0 = neuropix.neuropix_mode(ASIC_RECORDING);
+	std::cout << "set mode error code: " << err0 << std::endl;
+	DigitalControlErrorCode err3 = neuropix.neuropix_nrst(false);
+	std::cout << "nrst 1 error code: " << err3 << std::endl;
+	ErrorCode err4 = neuropix.neuropix_resetDatapath();
+	std::cout << "reset datapath error code: " << err4 << std::endl;
 }
 
 void NeuropixThread::closeConnection()
@@ -116,19 +126,17 @@ bool NeuropixThread::startAcquisition()
 	// clear the internal buffer
 	dataBuffer->clear();
 
-
-	// prepare probe for streaming data
-	ErrorCode err1 = neuropix.neuropix_datamode(true);
-	std::cout << "set datamode error code: " << err1 << std::endl;
-	DigitalControlErrorCode err0 = neuropix.neuropix_mode(ASIC_RECORDING);
-	std::cout << "set mode error code: " << err0 << std::endl;
+	// stop data stream
 	DigitalControlErrorCode err3 = neuropix.neuropix_nrst(false);
 	std::cout << "nrst 1 error code: " << err3 << std::endl;
+
+	// clear the buffer
 	ErrorCode err4 = neuropix.neuropix_resetDatapath();
 	std::cout << "reset datapath error code: " << err4 << std::endl;
+
+	// start data stream
 	DigitalControlErrorCode err5 = neuropix.neuropix_nrst(true);
 	std::cout << "nrst 2 error code: " << err5 << std::endl;
-
 
 	if (internalTrigger)
 	{
@@ -175,9 +183,13 @@ bool NeuropixThread::stopAcquisition()
 	if (recordToNpx)
 		neuropix.neuropix_stopRecording();
 
-	//neuropix.neuropix_nrst(false);
+	// stop data stream
+	DigitalControlErrorCode err3 = neuropix.neuropix_nrst(false);
+	std::cout << "nrst 1 error code: " << err3 << std::endl;
 
-	//closeConnection(); // closes the data and configuration link 
+	// clear the buffer
+	ErrorCode err4 = neuropix.neuropix_resetDatapath();
+	std::cout << "reset datapath error code: " << err4 << std::endl;
 
 	return true;
 }
