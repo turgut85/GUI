@@ -354,12 +354,12 @@ void AudioNode::process(AudioSampleBuffer& buffer,
                     {
 
                         backupBuffer->addFrom(0,                            // destination channel
-                                              samplesInBackupBuffer[i],     // destination start sample
+                                             samplesInBackupBuffer[i],     // destination start sample
                                               buffer,                       // source
                                               i+2,                          // source channel (add 2 to account for output channels)
                                               remainingSamples,             // source start sample
                                               orphanedSamples,              //  number of samples
-                                              gain                          // gain to apply
+                                             gain                          // gain to apply
                                              );
 
                         samplesInBackupBuffer.set(i, samplesInBackupBuffer[i] + orphanedSamples);
@@ -391,7 +391,7 @@ void AudioNode::process(AudioSampleBuffer& buffer,
 
                     for (destBufferPos = 0; destBufferPos < valuesNeeded; destBufferPos++)
                     {
-                        float gain = 1.0;
+                        //float gain = 1.0;
                         float alpha = (float) subSampleOffset;
                         float invAlpha = 1.0f - alpha;
 
@@ -402,16 +402,16 @@ void AudioNode::process(AudioSampleBuffer& buffer,
                                        *tempBuffer,     // source
                                        i,    // sourceChannel
                                        sourceBufferPos,// sourceSampleOffset
-                                       1,        // number of samples
-                                       invAlpha*gain);      // gain to apply to source
+                                      1,        // number of samples
+                                       invAlpha);      // gain to apply to source
 
                         buffer.addFrom(0,    // destChannel
                                        destBufferPos,   // destSampleOffset
                                        *tempBuffer,     // source
-                                       i,      // sourceChannel
+                                      i,      // sourceChannel
                                        nextPos,      // sourceSampleOffset
-                                       1,        // number of samples
-                                       alpha*gain);       // gain to apply to source
+                                      1,        // number of samples
+                                       alpha);       // gain to apply to source
 
                         // if (destBufferPos == 0)
                         //std::cout << "Output buffer 0 value: " << *buffer.getReadPointer(i+2,destBufferPos) << std::endl;
@@ -435,21 +435,11 @@ void AudioNode::process(AudioSampleBuffer& buffer,
                         filters[i]->process(destBufferPos, &ptr);
                     }
 
-                    // now copy the channel into the output zone
-
-                    // buffer.addFrom(0,    // destChannel
-                    //                0,  // destSampleOffset
-                    //                buffer,     // source
-                    //                 i+2,    // sourceChannel
-                    //                 0,// sourceSampleOffset
-                    //                 valuesNeeded,        // number of samples
-                    //                 1.0);      // gain to apply to source
-
                 } // if channelPointers[i]->isMonitored
             } // end cycling through channels
 
             // Simple implementation of a "noise gate" on audio output
-            expander.process(buffer.getWritePointer(0), // expand the left channel
+           expander.process(buffer.getWritePointer(0), // expand the left channel
                              buffer.getNumSamples());
 
             // copy the signal into the right channel (no stereo audio yet!)

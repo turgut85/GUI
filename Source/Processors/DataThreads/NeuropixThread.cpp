@@ -165,6 +165,8 @@ bool NeuropixThread::startAcquisition()
 	}
 
 	counter = 0;
+	timestamp = 0;
+	eventCode = 0;
 	  
 	startThread();
 
@@ -318,16 +320,12 @@ bool NeuropixThread::updateBuffer()
 
 	if (rec == READ_SUCCESS)
 	{
-		int64 timestamp = 0;
-		uint64 eventCode = 0;
-
 		float data[384];
 
 		if (counter <= 0)
 		{
-			std::cout << counter << ": " << packet.apData[0][0] << std::endl;
-			//	std::cout << timestamp << std::endl;
-			//	std::cout << neuropix.neuropix_fifoFilling() << std::endl;
+			std::cout << timestamp << ", ";
+			std::cout << neuropix.neuropix_fifoFilling() << std::endl;
 			counter = 5000;
 		}
 
@@ -335,9 +333,7 @@ bool NeuropixThread::updateBuffer()
 
 		for (int i = 0; i < 12; i++)
 		{
-			//eventCode = (uint64) packet.synchronization[i];
-			timestamp = (int64)packet.ctrs[i][0];
-
+			eventCode = 0; // (uint64) packet.synchronization[i]; // currently returning 65535
 
 			for (int j = 0; j < 384; j++)
 			{
@@ -346,6 +342,8 @@ bool NeuropixThread::updateBuffer()
 				
 			dataBuffer->addToBuffer(data, &timestamp, &eventCode, 1);
 		}
+
+		timestamp += 12;
 
 		//std::cout << "READ SUCCESS!" << std::endl;	
 		

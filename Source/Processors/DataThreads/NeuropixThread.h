@@ -139,6 +139,9 @@ private:
 	void openConnection();
 	void closeConnection();
 
+	int64 timestamp;
+	uint64 eventCode;
+
 };
 
 #endif  // NEUROPIXTHREAD_H_INCLUDED
